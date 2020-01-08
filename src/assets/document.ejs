@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="App-Config" content="fullscreen=yes,useHistoryState=yes,transition=yes" />
+  <meta content=yes name=apple-mobile-web-app-capable />
+  <meta content=yes name=apple-touch-fullscreen />
+  <meta content="telephone=no,email=no" name=format-detection />
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+  <title>自助血压测量(SBPM)</title>
+  <link rel="icon" href="./favicon.png" type="image/x-icon">
+  <link href="./iconfont/iconfont.css" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    // 利用 CSS3 旋转 对根容器逆时针旋转 90 度
+      var detectOrient = function () {
+        var width = document.documentElement.clientWidth,
+          height = document.documentElement.clientHeight,
+          $wrapper = document.getElementById("root"),
+          style = "";
+        if (width >= height) { // 横屏
+          style += "width:" + width + "px;";  // 注意旋转后的宽高切换
+          style += "height:" + height + "px;";
+          style += "-webkit-transform: rotate(0); transform: rotate(0);";
+          style += "-webkit-transform-origin: 0 0;";
+          style += "transform-origin: 0 0;";
+        }
+        else { // 竖屏
+          style += "width:" + height + "px;";
+          style += "height:" + width + "px;";
+          style += "-webkit-transform: rotate(90deg); transform: rotate(90deg);";
+          // 注意旋转中点的处理
+          style += "-webkit-transform-origin: " + width / 2 + "px " + width / 2 + "px;";
+          style += "transform-origin: " + width / 2 + "px " + width / 2 + "px;";
+        }
+        $wrapper.style.cssText = style;
+      }
+      window.onresize = detectOrient;
+      detectOrient();
+  </script>
+</body>
+
+</html>

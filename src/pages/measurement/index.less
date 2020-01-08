@@ -1,0 +1,64 @@
+@import "~antd-mobile/dist/antd-mobile.less";
+
+.page {
+  margin: 0 auto;
+  padding: 0 15px 15px;
+}
+
+.operationTip {
+  display: flex;
+
+  .left {
+    margin-right: 40px;
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: @brand-primary;
+    }
+
+    p {
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+  }
+
+  .right {
+    flex: 1;
+
+    img {
+      width: 300px;
+    }
+  }
+}
+
+.countDown {
+  position: relative;
+  width: 225px;
+  height: 225px;
+  text-align: center;
+  line-height: 225px;
+
+  &:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 225px;
+    height: 225px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.12);
+    content: '';
+  }
+
+  .time {
+    font-size: 42px;
+    color: @brand-primary;
+  }
+
+  p {
+    margin-top: 5px;
+    padding-left: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}

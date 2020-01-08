@@ -1,0 +1,64 @@
+@import "~antd-mobile/dist/antd-mobile.less";
+
+ul {
+  text-align: center;
+
+  .item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    margin-right: 65px;
+    border-bottom: 2px solid #999;
+
+    .step {
+      left: -2px;
+      top: 10px;
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      border-radius: 50%;
+      text-align: center;
+      background-color: #999;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .text {
+      margin-left: 5px;
+      font-size: 15px;
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      right: -45px;
+      width: 30px;
+      height: 30px;
+      background-image: url(../assets/double-right.png);
+      background-repeat: no-repeat;
+      background-size: 18px;
+      background-position: center;
+    }
+
+    &.active {
+      color: @brand-primary;
+      border-bottom-color: @brand-primary;
+
+      .step {
+        background-color: @brand-primary;
+      }
+    }
+
+    &:last-child {
+      &:after {
+        display: none;
+      }
+    }
+  }
+}
+
+

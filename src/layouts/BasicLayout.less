@@ -1,0 +1,83 @@
+
+@import "~antd-mobile/dist/antd-mobile.less";
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  height: 36px;
+  line-height: 36px;
+  padding: 0 12px;
+  background: @brand-primary;
+
+  .left {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.5;
+
+    .title {
+      line-height: 1.5;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: white;
+      margin-left: 6px;
+    }
+
+    .logo {
+      width: 21px;
+    }
+  }
+
+
+
+  .locale {
+    font-size: 8px;
+    color: #fff;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin: 10px;
+  padding: 10px 10px 0 10px;
+  background-color: #fff;
+
+  .clock {
+    font-size: 12px;
+    margin-left: 8px;
+  }
+
+  .progress {
+    margin-top: 15px;
+    margin-bottom: 30px;
+  }
+
+  .main {
+    flex: 1;
+    margin: 0 auto;
+    background-color: #fff;
+  }
+
+  .copyright {
+    margin: 8px;
+    text-align: right;
+    font-size: 8px;
+    color: #999;
+  }
+}
+
+.modal {
+  background-color: #fcf;
+  :global {
+    .am-input-label {
+      width: 1.1rem !important;
+    }
+  }
+}

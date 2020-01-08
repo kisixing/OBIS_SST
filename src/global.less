@@ -1,0 +1,30 @@
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #efefef;
+  font-family: sans-serif, "PingFang SC", "HelveticaNeue";
+  /* font-family: "HelveticaNeue", Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,Georgia,sans-serif; */
+}
+
+ul, li {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+}
+
+a[role=button] {
+  height: 32px;
+  line-height: 32px;
+  font-size: 14px;
+  border-radius: 6px;
+
+  :global {
+    .am-button-icon {
+      width: 21px;
+      height: 21px;
+    }
+  }
+}
