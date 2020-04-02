@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { InputItem, Button, Toast, ActivityIndicator } from 'antd-mobile';
+import { connect } from 'dva';
+import { InputItem, Modal, Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage } from 'umi-plugin-locale';
-import router from 'umi/router';
-import request from '../../utils/request';
+import Router from 'umi/router';
 import styles from './index.less';
-
-// test api
-const api = 'http://jsonplaceholder.typicode.com/users';
 
 function ScanAndLogin(props) {
   // 手机号码的存储是带格式化空格的
@@ -15,24 +12,11 @@ function ScanAndLogin(props) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    checkStatus();
-    //
     // Specify how to clean up after this effect:
     return function cleanup() {
 
     };
-  });
-
-  // 验证该用户是否建档
-  const checkStatus = () => {
-    request.get(api)
-      .then(res => {
-        console.log('request success!', res)
-      })
-      .catch(err => {
-        console.log('request error!', err);
-      });
-  };
+  }, []);
 
   const onErrorClick = () => {
     if (error) {
@@ -49,7 +33,6 @@ function ScanAndLogin(props) {
       return;
     }
     const value = e.target.value;
-    console.log('787878787', e, e.target);
     let newPhone = phone.concat(value);
     if (newPhone.length === 3 || newPhone.length === 8) {
       newPhone += ' ';
@@ -76,8 +59,32 @@ function ScanAndLogin(props) {
     } else {
       setError(true);
     }
-
   }
+
+  const getUser = mobile => {
+    const { dispatch } = props;
+    dispatch({
+      type: 'global/getDocByMobile',
+      payload: mobile
+    }).then(res => {
+      if (res && res.code === '1') {
+        const data = res.object;
+        Router.push({
+          pathname: '/measurement',
+          query: {
+            name: data.username,
+            id: data.id,
+          },
+        });
+        setLoading(false);
+      } else {
+        // Toast.info(res.message);
+        Modal.alert('提示', '您还未建档，请前往移动端建档。', [
+          { text: '确定', onPress: () => {} },
+        ]);;
+      }
+    });
+  };
 
   const submit = e => {
     e.stopPropagation();
@@ -90,13 +97,7 @@ function ScanAndLogin(props) {
     if (error) {
       return Toast.info(formatMessage({ id: 'lianmed.phoneError' }));
     }
-
-    console.log('onSubmit-->', props, vv);
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.push('/measurement');
-    }, 1000);
+    getUser(vv);
   }
 
   return (
@@ -116,6 +117,7 @@ function ScanAndLogin(props) {
           <div>
             <InputItem
               disabled
+              autoFocus
               type="phone"
               placeholder={formatMessage({ id: 'lianmed.phonePlaceholder' })}
               className={styles.input}
@@ -177,4 +179,7 @@ function ScanAndLogin(props) {
   );
 }
 
-export default ScanAndLogin;
+export default connect(({ global, loading }) => ({
+  global,
+  submitting: loading.effects['global/getDocByMobile'],
+}))(ScanAndLogin);

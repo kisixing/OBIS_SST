@@ -51,6 +51,11 @@ const errorHandler = error => {
 const request = extend({
   errorHandler, // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
+  requestType: 'form',
+  headers: {
+    Accept: '*/*',
+    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+  },
 });
 
 export default request;

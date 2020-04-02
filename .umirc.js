@@ -64,4 +64,11 @@ export default {
   alias: {
     '@': resolve(__dirname, './src'),
   },
+  proxy: {
+    '/api': {
+      target: 'http://119.23.213.124/',
+      changeOrigin: false,
+      // pathRewrite: { '^/api': '' },
+    },
+  },
 };

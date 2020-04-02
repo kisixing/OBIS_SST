@@ -3,7 +3,8 @@
  * layout布局 header conten footer
  */
 import React, { useState, useEffect } from 'react';
-import { Modal, List, InputItem, Toast } from 'antd-mobile';
+import { connect } from 'dva';
+import { Modal, List, InputItem, Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
 import { stringify } from 'qs';
 import Socket from '../utils/webSocket';
@@ -31,14 +32,14 @@ function BasicLayout(props) {
   const key = pathname ? pathname.substr(1) : '';
 
   useEffect(() => {
-    if (web || socket) {
+    if (web && socket) {
       createSocket();
     } else {
       // 设置网络
       setVisible(true);
     }
     return () => {
-      // Socket.onClose();
+      Socket.onclose();
     };
   }, [])
 
@@ -90,17 +91,15 @@ function BasicLayout(props) {
   // 创建websocket连接
   const createSocket = () => {
     const socketService = localStorage.getItem('lianmed_web_socket');
-    const params = {
-      clientType: 'ctg-suit',
-      token: 'eyJ1c2VybmFtZSI6ICJhZG1pbiIsInBhc3N3b3JkIjogImFkbWluIn0=',
-    };
-    const socketUrl = `ws://${socketService}/?${stringify(params)}`;
+    // const params = {
+    //   clientType: 'ctg-suit',
+    //   token: 'eyJ1c2VybmFtZSI6ICJhZG1pbiIsInBhc3N3b3JkIjogImFkbWluIn0=',
+    // };
+    // const socketUrl = `ws://${socketService}/?${stringify(params)}`;
+    const socketUrl = `ws://${socketService}`;
     const socket = new Socket({
       socketUrl: socketUrl,
-      timeout: 5000,
-      socketMessage: receive => {
-        // console.log(receive); //后端返回的数据，渲染页面
-      },
+      timeout: 15000,
       socketClose: msg => {
         console.log(msg);
       },
@@ -116,6 +115,19 @@ function BasicLayout(props) {
         //   this.socket.sendMessage({ msgType: 0 });
         // }, 30000);
       },
+      socketMessage: receive => {
+        const result = JSON.parse(receive.data);
+        const { name, data } = result;
+        if (name === 'QRcode') {
+          const arr = data.split(/[=#]/);
+          const userid = arr[1].slice(1, -1);
+          getUSer(userid);
+        }
+        if (name === 'SerialData') {
+          pushSerialData(data);
+          console.log('object')
+        }
+      },
     });
     // 重试创建socket连接
     try {
@@ -124,6 +136,20 @@ function BasicLayout(props) {
       // 捕获异常，防止js error
       console.log('异常连接', e);
     }
+  };
+
+  const getUSer = (id) => {
+    props.dispatch({
+      type: 'global/getDocById',
+      payload: id,
+    });
+  }
+
+  const pushSerialData = (data) => {
+    props.dispatch({
+      type: 'global/instackBuffer',
+      payload: data,
+    });
   };
 
   return (
@@ -175,9 +201,12 @@ function BasicLayout(props) {
           </InputItem>
         </List>
       </Modal>
+      <ActivityIndicator toast text="Loading..." animating={!!props.submitting} />
     </div>
   );
 }
 
-
-export default BasicLayout;
+export default connect(({ global, loading }) => ({
+  global,
+  submitting: loading.effects['global/getDocById'],
+}))(BasicLayout);

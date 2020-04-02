@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Toast, Modal } from 'antd-mobile';
+import { connect } from 'dva';
+import moment from 'moment';
+import { Button, Modal } from 'antd-mobile';
 import { formatMessage } from 'umi-plugin-locale';
-import router from 'umi/router';
+import Router from 'umi/router';
 import styles from './index.less';
 
 const alert = Modal.alert;
@@ -36,9 +38,9 @@ const GRADES = [
   },
 ];
 
-export default function Result() {
+function Result({ dispatch, result, user }) {
   const [value, setValue] = useState([
-    { label: '血压', value: '' },
+    { label: '血压', value: [] },
     { lable: '心率', value: '' },
   ]);
   const [grade, setGrade] = useState('normal');
@@ -46,14 +48,19 @@ export default function Result() {
 
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
-    setValue([
-      { label: '血压', value: ['78', '128'] },
-      { lable: '心率', value: '88' },
-    ]);
-    return function cleanup() {
+    if (result.length) {
+      console.log('结果', result);
+      setValue([
+        {
+          label: '血压',
+          value: [result[4].replace(/\b(0+)/gi, ''), result[6].replace(/\b(0+)/gi, '')],
+        },
+        { lable: '心率', value: result[7].replace(/\b(0+)/gi, '') },
+      ]);
+    }
 
-    };
-  }, []);
+    return function cleanup() {};
+  }, [result]);
 
   // 重新测量血压
   const remeasure = () => {
@@ -66,7 +73,7 @@ export default function Result() {
       {
         text: formatMessage({ id: 'lianmed.confirm' }),
         onPress: () => {
-          router.push('/measurement');
+          Router.push('/measurement');
         },
       },
     ]);
@@ -74,10 +81,33 @@ export default function Result() {
 
   const onSave = () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Toast.success('保存成功！');
-    }, 1000);
+    dispatch({
+      type: 'global/insertBgRecord',
+      payload: {
+        userid: user.id,
+        date: moment(result[2] + ' ' + result[3]).format('YYYY-MM-DD HH:mm:ss'),
+        diastolicpressure: result[6].replace(/\b(0+)/gi, ''),
+        shrinkpressure: result[4].replace(/\b(0+)/gi, ''),
+        heartrate: result[7].replace(/\b(0+)/gi, ''),
+      },
+    }).then(res => {
+      if (res && res.code === '1') {
+        setLoading(false);
+        alert('提示', '数据保存成功', [
+          { text: '确定', onPress: () => {
+            dispatch({
+              type: 'global/updateState',
+              payload: {
+                user: {},
+                result: [],
+                buffer: [],
+              },
+            });
+            Router.push('/scan');
+          } },
+        ]);
+      }
+    });
   };
 
   return (
@@ -85,17 +115,18 @@ export default function Result() {
       <ul className={styles.grade}>
         {GRADES.map(e => {
           const color = e.color;
+          const isShow = e.key === grade;
           return (
             <li key={e.key} className={styles.item}>
               <div
                 className={styles.bubble}
-                style={{ borderColor: color, display: 'inline-block' }}
+                style={{ borderColor: color, display: isShow ? 'inline-block' : 'none' }}
               >
                 {e.label}
               </div>
               <div
                 className={styles.arrow}
-                style={{ borderTopColor: color, display: 'inline-block' }}
+                style={{ borderTopColor: color, display: isShow ? 'inline-block' : 'none' }}
               />
               <div className={styles.colorlump} style={{ backgroundColor: color }} />
             </li>
@@ -104,22 +135,28 @@ export default function Result() {
       </ul>
       <div className={styles.score}>
         <span style={{ marginRight: '0.4rem' }}>
-          {formatMessage({ id: 'lianmed.BloodPressure' })}：{'127/87'}{' '}
+          {formatMessage({ id: 'lianmed.BloodPressure' })}：
+          {value[0]['value'][0]} / {value[0]['value'][1]}
           <span className={styles.unit}>mmHg</span>
         </span>
         <span>
-          {formatMessage({ id: 'lianmed.HeartRate' })}：{'88'}{' '}
-          <span className={styles.unit}>times/min</span>
+          {formatMessage({ id: 'lianmed.HeartRate' })}：{value[1]['value']}{' '}
+          <span className={styles.unit}>次/分钟</span>
         </span>
       </div>
       <div className={styles.buttonView}>
         <Button inline type="ghost" onClick={remeasure}>
           {formatMessage({ id: 'lianmed.remeasure' })}
         </Button>
-        <Button inline type="primary" loading={loading} onClick={onSave}>
+        <Button inline type="primary" loading={loading} disabled={!result} onClick={onSave}>
           {formatMessage({ id: 'lianmed.save' })}
         </Button>
       </div>
     </div>
   );
 }
+
+export default connect(({ global }) => ({
+  result: global.result,
+  user: global.user,
+}))(Result);
