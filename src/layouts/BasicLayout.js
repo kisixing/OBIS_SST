@@ -2,11 +2,10 @@
 /**
  * layout布局 header conten footer
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { connect } from 'dva';
 import { Modal, List, InputItem, Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
-import { stringify } from 'qs';
 import Socket from '../utils/webSocket';
 import Clock from '../components/Clock';
 import ProgressBar from './ProgressBar';
@@ -15,6 +14,7 @@ import logo from '../assets/logo.png';
 import styles from './BasicLayout.less';
 
 function BasicLayout(props) {
+
   const initLocale = getLocale();
   // 检查storage是否存储了网络信息
   const webUrl = localStorage.getItem('lianmed_web_service');
@@ -32,14 +32,19 @@ function BasicLayout(props) {
   const key = pathname ? pathname.substr(1) : '';
 
   useEffect(() => {
-    if (web && socket) {
-      createSocket();
-    } else {
-      // 设置网络
-      setVisible(true);
-    }
+    let s = null;
+    // TODO
+    // s = createSocket();
+    // if (web && socket) {
+    //   s = createSocket();
+    // } else {
+    //   // 设置网络
+    //   setVisible(true);
+    // }
     return () => {
-      Socket.onclose();
+      if (stage) {
+        s.close();
+      }
     };
   }, [])
 
@@ -70,8 +75,10 @@ function BasicLayout(props) {
     if (web && socket) {
       localStorage.setItem('lianmed_web_service', web);
       localStorage.setItem('lianmed_web_socket', socket);
-      createSocket();
       setVisible(false);
+      setTimeout(() => {
+        createSocket();
+      }, 600);
     } else {
       Toast.fail('请输入完整网络设置信息！');
     }
@@ -90,22 +97,32 @@ function BasicLayout(props) {
 
   // 创建websocket连接
   const createSocket = () => {
-    const socketService = localStorage.getItem('lianmed_web_socket');
+    // const socketService = localStorage.getItem('lianmed_web_socket');
     // const params = {
     //   clientType: 'ctg-suit',
     //   token: 'eyJ1c2VybmFtZSI6ICJhZG1pbiIsInBhc3N3b3JkIjogImFkbWluIn0=',
     // };
     // const socketUrl = `ws://${socketService}/?${stringify(params)}`;
-    const socketUrl = `ws://${socketService}`;
+    // const socketUrl = `ws://${socketService}`;
     const socket = new Socket({
-      socketUrl: socketUrl,
-      timeout: 15000,
+      // socketUrl: socketUrl,
+      timeout: 5000,
       socketClose: msg => {
         console.log(msg);
       },
       socketError: () => {
         setStage(false);
-        console.log(stage + '连接建立失败');
+        Modal.alert('提示', '连接建立失败', [
+          { text: '重新连接', onPress: () => {
+            // 重试创建socket连接
+            try {
+              socket.connection();
+            } catch (e) {
+              // 捕获异常，防止js error
+              console.log('异常连接', e);
+            }
+          } },
+        ]);
       },
       socketOpen: () => {
         console.log('连接建立成功');
@@ -155,13 +172,13 @@ function BasicLayout(props) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <a href="#" className={styles.left}>
+        <div className={styles.left}>
           <img className={styles.logo} src={logo} alt="lian-med logo" />
           <span className={styles.title}>{formatMessage({ id: 'lianmed.title' })}</span>
-        </a>
-        <a className={styles.locale} href="#" onClick={onLocaleChange}>
+        </div>
+        {/* <a className={styles.locale} onClick={onLocaleChange}>
           {language === 'zh-CN' ? 'ENGLISH' : '中文'}
-        </a>
+        </a> */}
       </div>
       <div className={styles.content}>
         <div className={styles.clock}>
@@ -174,7 +191,7 @@ function BasicLayout(props) {
         <div className={styles.main}>{props.children}</div>
         <div className={styles.copyright}>Copyright © 广州莲印医疗科技</div>
       </div>
-      <Modal
+      {/* <Modal
         visible={visible}
         transparent
         maskClosable={false}
@@ -200,7 +217,7 @@ function BasicLayout(props) {
             socket
           </InputItem>
         </List>
-      </Modal>
+      </Modal> */}
       <ActivityIndicator toast text="Loading..." animating={!!props.submitting} />
     </div>
   );

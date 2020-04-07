@@ -14,7 +14,9 @@ module.exports = class webSocket {
     this.isSucces = true;
   }
   connection = () => {
-    let { socketUrl, timeout = 0 } = this.param;
+    const url = `ws://${window.configuration.ws}`;
+    let { socketUrl = url, timeout = 0 } = this.param;
+
     // 检测当前浏览器是什么浏览器来决定用什么socket
     // if ('WebSocket' in window) {
     //   console.log('WebSocket');
@@ -68,13 +70,13 @@ module.exports = class webSocket {
     if (e.code === '4500') {
       this.socket.close();
     } else {
-      this.taskRemindInterval = setInterval(() => {
-        if (this.isSucces) {
-          this.connection();
-        } else {
-          clearInterval(this.taskRemindInterval);
-        }
-      }, 1000 * 60);
+      // this.taskRemindInterval = setInterval(() => {
+      //   if (this.isSucces) {
+      //     this.connection();
+      //   } else {
+      //     clearInterval(this.taskRemindInterval);
+      //   }
+      // }, 1000 * 60);
     }
   };
   onerror = e => {

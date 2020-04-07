@@ -10,7 +10,7 @@ export default {
       path: '/',
       component: '../layouts/BasicLayout',
       routes: [
-        { path: '/', redirect: '/scan' },
+        // { path: '/', redirect: '/scan' },
         { path: '/scan', component: '../pages/scanAndLogin/index' },
         { path: '/measurement', component: '../pages/measurement/index' },
         { path: '/result', component: '../pages/result/index' },
@@ -53,7 +53,8 @@ export default {
               'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no',
           },
         ],
-        links: [{ rel: 'icon', href: './favicon.png', type: 'image/x-icon' }],
+        links: [{ rel: 'icon', href: '/favicon.png', type: 'image/x-icon' }],
+        headScripts: [{ src: '/config.js' }],
       },
     ],
   ],

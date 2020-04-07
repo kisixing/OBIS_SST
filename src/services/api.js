@@ -1,7 +1,8 @@
 import { stringify } from 'querystring';
 import request from '../utils/request';
 
-const base_url = process.env.NODE_ENV === 'development' ? '' : `http://${localStorage.getItem('lianmed_web_service')}`;
+const url = window.location.host;
+const base_url = process.env.NODE_ENV === 'development' ? '' : url;
 
 export async function getDocByMobile(mobile) {
   return request(`${base_url}/api/getDocByMobile?mobile=${mobile}`);
