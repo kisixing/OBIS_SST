@@ -103,7 +103,7 @@ function ScanAndLogin(props) {
   return (
     <div className={styles.page}>
       <div className={styles.scan}>
-        <h1>扫描二维码</h1>
+        {/* <h1>扫描二维码</h1> */}
         <div className={styles.innerBox}>
           <div className={styles.icon} />
         </div>
@@ -111,7 +111,7 @@ function ScanAndLogin(props) {
       </div>
       <div className={styles.separator} />
       <form className={styles.form}>
-        <div className={styles.label}>{formatMessage({ id: 'lianmed.phone' })}</div>
+        {/* <div className={styles.label}>{formatMessage({ id: 'lianmed.phone' })}</div> */}
         <div className={styles.control}>
           <span className={styles.prefix} />
           <div>

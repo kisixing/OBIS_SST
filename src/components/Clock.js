@@ -42,9 +42,13 @@ class Clock extends React.Component {
   render() {
     const { year, month, date, hours, minutes, seconds, ampm } = this.state;
     return (
-      <div style={{ display: 'inline-block', fontSize: '.12rem', color: '#333' }}>
+      <div style={{ display: 'inline-block', fontSize: '.1rem', color: '#333' }}>
         <span style={{ marginRight: '0.08rem' }}>
-          {`${year}-${month}-${date}`}
+          {year}
+          -
+          {month > 9 ? month : `0${month + 1}` }
+          -
+          {date > 9 ? date : `0${date}`}
         </span>
         <span>
           {hours === 0 ? 12 : hours > 12 ? hours - 12 : hours}:

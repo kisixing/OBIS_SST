@@ -69,7 +69,7 @@ export default {
       const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{3},[0-9]{3},[0-9]{3},[0-9]{3}\,\d\r/;
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
-        console.log('55555555', hex, string, res.test(string));
+        // console.log('55555555', hex, string, res.test(string));
         if (!res.test(string)) {
           Modal.alert('提示', '测量失败，请重新测量', [{ text: '确定', onPress: () => {
             put({
@@ -82,7 +82,7 @@ export default {
           } }]);
         } else {
           const arr = string.split(',')
-          console.log('888888', hex, string);
+          // console.log('888888', hex, string);
           yield put({
             type: 'updateState',
             payload: {

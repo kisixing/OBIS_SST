@@ -34,7 +34,7 @@ function BasicLayout(props) {
   useEffect(() => {
     let s = null;
     // TODO
-    // s = createSocket();
+    s = createSocket();
     // if (web && socket) {
     //   s = createSocket();
     // } else {
@@ -112,16 +112,19 @@ function BasicLayout(props) {
       },
       socketError: () => {
         setStage(false);
-        Modal.alert('提示', '连接建立失败', [
-          { text: '重新连接', onPress: () => {
-            // 重试创建socket连接
-            try {
-              socket.connection();
-            } catch (e) {
-              // 捕获异常，防止js error
-              console.log('异常连接', e);
-            }
-          } },
+        Modal.alert('提示', '建立连接失败', [
+          {
+            text: '重新连接',
+            onPress: () => {
+              // 重试创建socket连接
+              try {
+                socket.connection();
+              } catch (e) {
+                // 捕获异常，防止js error
+                console.log('异常连接', e);
+              }
+            },
+          },
         ]);
       },
       socketOpen: () => {

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'dva';
 import moment from 'moment';
-import { Button, Modal } from 'antd-mobile';
+import { Button, Modal, Toast } from 'antd-mobile';
 import { formatMessage } from 'umi-plugin-locale';
 import Router from 'umi/router';
+import CountDown from '@/components/CountDown';
 import styles from './index.less';
 
 const alert = Modal.alert;
@@ -11,6 +12,7 @@ const GRADES = [
   {
     label: '低血压',
     key: 'lower',
+    tips: '血压偏低，请休息5~10分钟后再次测量。',
     min: [0, 59],
     max: [0, 89],
     color: '#2B89F7'
@@ -18,12 +20,14 @@ const GRADES = [
   {
     label: '正常',
     key: 'normal',
+    tips: '血压正常，请继续保持。',
     min: [60, 90],
     max: [80, 140],
     color: '#80E680'
   },
   {
     label: '轻度高血压',
+    tips: '血压偏高，请休息5~10分钟后再次测量。',
     key: 'higher',
     min: [91, 100],
     max: [140, 160],
@@ -31,6 +35,7 @@ const GRADES = [
   },
   {
     label: '高血压',
+    tips: '血压偏高，请休息5~10分钟后再次测量。',
     key: 'highest',
     min: [100, 999],
     max: [160, 999],
@@ -43,24 +48,45 @@ function Result({ dispatch, result, user }) {
     { label: '血压', value: [] },
     { lable: '心率', value: '' },
   ]);
-  const [grade, setGrade] = useState('normal');
+  const [grade, setGrade] = useState(GRADES[1]);
   const [loading, setLoading] = useState(false);
 
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     if (result.length) {
-      console.log('结果', result);
+      const hBP = result[4].replace(/\b(0+)/gi, '');
+      const lBP = result[6].replace(/\b(0+)/gi, '');
+      const rate = result[7].replace(/\b(0+)/gi, '');
+      judgeGrade(hBP, lBP);
       setValue([
         {
           label: '血压',
-          value: [result[4].replace(/\b(0+)/gi, ''), result[6].replace(/\b(0+)/gi, '')],
+          value: [hBP, lBP],
         },
-        { lable: '心率', value: result[7].replace(/\b(0+)/gi, '') },
+        { lable: '心率', value: rate },
       ]);
     }
 
     return function cleanup() {};
   }, [result]);
+
+  // 判断血压是否在正常
+  const judgeGrade = (h, l) => {
+    let index = 1; // 正常血压
+    if (h > 160 && l > 100) {
+      //高血压
+      index = 3;
+    }
+    if (140 < h < 160 && 90 < l < 100) {
+      // 轻度高血压
+      index = 2;
+    }
+    if (h < 89 && l < 59) {
+      // 低血压
+      index = 0;
+    }
+    setGrade(GRADES[index])
+  }
 
   // 重新测量血压
   const remeasure = () => {
@@ -80,7 +106,12 @@ function Result({ dispatch, result, user }) {
   };
 
   const onSave = () => {
+    // countDown();
     setLoading(true);
+    if (!result.length) {
+      setLoading(false);
+      return Toast.info('您还未测试血压！')
+    }
     dispatch({
       type: 'global/insertBgRecord',
       payload: {
@@ -93,8 +124,27 @@ function Result({ dispatch, result, user }) {
     }).then(res => {
       if (res && res.code === '1') {
         setLoading(false);
-        alert('提示', '数据保存成功', [
-          { text: '确定', onPress: () => {
+        countDown();
+      }
+    });
+  };
+
+  const countDown = () => {
+    let secondsToGo = 15;
+    const alertInstance = alert(
+      '提示',
+      <div>
+        保存成功，{grade.tips}
+        <CountDown
+          target={new Date().getTime() + secondsToGo * 1000}
+          format={e => <span>{moment(e).format('ss')}</span>}
+        />
+        s后关闭
+      </div>,
+      [
+        {
+          text: '确定',
+          onPress: () => {
             dispatch({
               type: 'global/updateState',
               payload: {
@@ -104,23 +154,26 @@ function Result({ dispatch, result, user }) {
               },
             });
             Router.push('/scan');
-          } },
-        ]);
-      }
-    });
-  };
+          },
+        },
+      ],
+    );
+    setTimeout(() => {
+      alertInstance.close();
+    }, secondsToGo * 1000);
+  }
 
   return (
     <div className={styles.page}>
       <ul className={styles.grade}>
         {GRADES.map(e => {
           const color = e.color;
-          const isShow = e.key === grade;
+          const isShow = e.key === grade.key;
           return (
             <li key={e.key} className={styles.item}>
               <div
                 className={styles.bubble}
-                style={{ borderColor: color, display: isShow ? 'inline-block' : 'none' }}
+                style={{ borderColor: color, display: isShow ? 'flex' : 'none' }}
               >
                 {e.label}
               </div>

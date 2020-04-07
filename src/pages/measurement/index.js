@@ -37,6 +37,14 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted } 
       {
         text: formatMessage({ id: 'lianmed.confirm' }),
         onPress: () => {
+          dispatch({
+            type: 'global/updateState',
+            payload: {
+              user: {},
+              result: [],
+              buffer: [],
+            },
+          });
           Router.push('/scan');
         },
       },
@@ -44,25 +52,24 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted } 
   };
 
   const onEnd = () => {
-    console.log('count down!!!');
     Router.push('/result');
   };
 
-  const insertRecord = () => {
-    dispatch({
-      type: 'global/insertBgRecord',
-      payload: {
-        userid: '',
-        date: '', // string
-        diastolicpressure: '', // 舒张压
-        shrinkpressure: '', // 高血压
-      },
-    }).then(res => {
-      if (res && res.code === '1') {
-        Toast.info('血压保存成功!');
-      }
-    });
-  };
+  // const insertRecord = () => {
+  //   dispatch({
+  //     type: 'global/insertBgRecord',
+  //     payload: {
+  //       userid: '',
+  //       date: '', // string
+  //       diastolicpressure: '', // 舒张压
+  //       shrinkpressure: '', // 高血压
+  //     },
+  //   }).then(res => {
+  //     if (res && res.code === '1') {
+  //       Toast.info('血压保存成功!');
+  //     }
+  //   });
+  // };
 
   return (
     <div className={styles.page}>
@@ -95,7 +102,6 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted } 
             <Button
               type="primary"
               inline
-              disabled
               size="small"
               style={{ marginTop: '1.2rem' }}
               onClick={goBack}
