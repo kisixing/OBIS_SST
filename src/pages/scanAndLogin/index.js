@@ -79,7 +79,7 @@ function ScanAndLogin(props) {
         setLoading(false);
       } else {
         // Toast.info(res.message);
-        Modal.alert('提示', '您还未建档，请前往移动端建档。', [
+        Modal.alert('提示', `孕册${res.message}，请前往移动端建档。`, [
           { text: '确定', onPress: () => {} },
         ]);;
       }

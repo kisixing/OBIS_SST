@@ -51,8 +51,11 @@ class Clock extends React.Component {
           {date > 9 ? date : `0${date}`}
         </span>
         <span>
-          {hours === 0 ? 12 : hours > 12 ? hours - 12 : hours}:
-          {minutes > 9 ? minutes : `0${minutes}`}:{seconds > 9 ? seconds : `0${seconds}`} {ampm}
+          {hours}:
+          {minutes > 9 ? minutes : `0${minutes}`}:
+          {seconds > 9 ? seconds : `0${seconds}`}
+          {' '}
+          {ampm}
         </span>
       </div>
     );

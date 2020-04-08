@@ -1,7 +1,8 @@
 import { stringify } from 'querystring';
 import request from '../utils/request';
 
-const url = window.location.host;
+const url = `http://${window.location.host}`;
+console.log('object', url)
 const base_url = process.env.NODE_ENV === 'development' ? '' : url;
 
 export async function getDocByMobile(mobile) {

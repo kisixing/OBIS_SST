@@ -14,19 +14,10 @@ import logo from '../assets/logo.png';
 import styles from './BasicLayout.less';
 
 function BasicLayout(props) {
-
   const initLocale = getLocale();
-  // 检查storage是否存储了网络信息
-  const webUrl = localStorage.getItem('lianmed_web_service');
-  const socketUrl = localStorage.getItem('lianmed_web_socket');
-
   const [language, setLanguage] = useState(initLocale);
   const [stage, setStage] = useState(false);
-  const [visible, setVisible] = useState(false);
 
-  // 服务地址
-  const [web, setWeb] = useState(webUrl);
-  const [socket, setSocket] = useState(socketUrl);
   // 获取当前current key
   const pathname = props.location.pathname;
   const key = pathname ? pathname.substr(1) : '';
@@ -35,12 +26,6 @@ function BasicLayout(props) {
     let s = null;
     // TODO
     s = createSocket();
-    // if (web && socket) {
-    //   s = createSocket();
-    // } else {
-    //   // 设置网络
-    //   setVisible(true);
-    // }
     return () => {
       if (stage) {
         s.close();
@@ -70,19 +55,6 @@ function BasicLayout(props) {
     }
     return null;
   }
-
-  const onSave = () => {
-    if (web && socket) {
-      localStorage.setItem('lianmed_web_service', web);
-      localStorage.setItem('lianmed_web_socket', socket);
-      setVisible(false);
-      setTimeout(() => {
-        createSocket();
-      }, 600);
-    } else {
-      Toast.fail('请输入完整网络设置信息！');
-    }
-  };
 
   // 切换语言
   const onLocaleChange = () => {
@@ -141,11 +113,15 @@ function BasicLayout(props) {
         if (name === 'QRcode') {
           const arr = data.split(/[=#]/);
           const userid = arr[1].slice(1, -1);
-          getUSer(userid);
+          if (checkQRCode()) {
+            Toast.info('请使用围产保健-我的二维码')
+          } else {
+            getUSer(userid);
+          }
         }
         if (name === 'SerialData') {
           pushSerialData(data);
-          console.log('object')
+          // console.log('object')
         }
       },
     });
@@ -155,6 +131,16 @@ function BasicLayout(props) {
     } catch (e) {
       // 捕获异常，防止js error
       console.log('异常连接', e);
+    }
+  };
+
+  // 检验二维码的合法性
+  const checkQRCode = string => {
+    const res = /^Z([.*])J$/g;
+    if (res.test(string)) {
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -192,35 +178,8 @@ function BasicLayout(props) {
           <ProgressBar activeKey={key} />
         </div>
         <div className={styles.main}>{props.children}</div>
-        <div className={styles.copyright}>Copyright © 广州莲印医疗科技</div>
+        {/* <div className={styles.copyright}>Copyright © 广州莲印医疗科技</div> */}
       </div>
-      {/* <Modal
-        visible={visible}
-        transparent
-        maskClosable={false}
-        onClose={() => setVisible(false)}
-        title="网络设置"
-        className={styles.modal}
-        footer={[
-          {
-            text: '保存',
-            onPress: onSave,
-          },
-        ]}
-        wrapProps={{ onTouchStart: onWrapTouchStart }}
-        afterClose={() => {
-          // alert('afterClose');
-        }}
-      >
-        <List>
-          <InputItem clear placeholder="web service..." onChange={value => setWeb(value)}>
-            web
-          </InputItem>
-          <InputItem clear placeholder="socket service..." onChange={value => setSocket(value)}>
-            socket
-          </InputItem>
-        </List>
-      </Modal> */}
       <ActivityIndicator toast text="Loading..." animating={!!props.submitting} />
     </div>
   );
