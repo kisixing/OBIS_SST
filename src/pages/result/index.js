@@ -55,9 +55,9 @@ function Result({ dispatch, result, user }) {
   useEffect(() => {
     if (result.length) {
       const hBP = result[4].replace(/\b(0+)/gi, '');
-      const lBP = result[6].replace(/\b(0+)/gi, '');
-      const rate = result[7].replace(/\b(0+)/gi, '');
-      judgeGrade(hBP, lBP);
+      const lBP = result[5].replace(/\b(0+)/gi, '');
+      const rate = result[6].replace(/\b(0+)/gi, '');
+      judgeGrade(hBP * 1, lBP * 1);
       setValue([
         {
           label: '血压',
@@ -73,20 +73,22 @@ function Result({ dispatch, result, user }) {
   // 判断血压是否在正常
   const judgeGrade = (h, l) => {
     let index = 1; // 正常血压
-    if (h > 160 && l > 100) {
+    if (h >= 160 || l >= 100) {
       //高血压
       index = 3;
     }
-    if (140 < h < 160 && 90 < l < 100) {
+    if ((h > 140 && h < 160) || (l > 90 && l < 100)) {
       // 轻度高血压
       index = 2;
     }
-    if (h < 89 && l < 59) {
+    if (h < 90 || l < 60) {
       // 低血压
       index = 0;
     }
+    // console.log('object', GRADES[index]);
     setGrade(GRADES[index])
   }
+  // judgeGrade();
 
   // 重新测量血压
   const remeasure = () => {

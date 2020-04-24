@@ -3,7 +3,8 @@
  * timeout：连接超时时间
  * @type {module.webSocket}
  */
-// const SockJS = require('sockjs-client');
+
+const SockJS = require('sockjs-client');
 
 module.exports = class webSocket {
   constructor(param = {}) {
@@ -14,16 +15,15 @@ module.exports = class webSocket {
     this.isSucces = true;
   }
   connection = () => {
-    const url = `ws://${window.configuration.ws}`;
-    let { socketUrl = url, timeout = 0 } = this.param;
+    let { socketUrl, timeout = 0 } = this.param;
 
-    // 检测当前浏览器是什么浏览器来决定用什么socket
+    // // 检测当前浏览器是什么浏览器来决定用什么socket
     // if ('WebSocket' in window) {
     //   console.log('WebSocket');
     //   this.socket = new WebSocket(socketUrl);
     // } else if ('MozWebSocket' in window) {
     //   console.log('MozWebSocket');
-    //   // this.socket = new MozWebSocket(socketUrl);
+    //   this.socket = new window.MozWebSocket(socketUrl);
     // } else {
     //   console.log('SockJS');
     //   this.socket = new SockJS(socketUrl);
@@ -67,7 +67,7 @@ module.exports = class webSocket {
     // 根据后端返回的状态码做操作
     // 我的项目是当前页面打开两个或者以上，就把当前以打开的socket关闭
     // 否则就60s秒重连一次，直到重连成功为止
-    if (e.code === '4500') {
+    if (e && e.code === '4500') {
       this.socket.close();
     } else {
       // this.taskRemindInterval = setInterval(() => {

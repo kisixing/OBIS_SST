@@ -12,85 +12,94 @@ import ProgressBar from './ProgressBar';
 
 import logo from '../assets/logo.png';
 import styles from './BasicLayout.less';
+import { render } from 'react-dom';
 
-function BasicLayout(props) {
-  const initLocale = getLocale();
-  const [language, setLanguage] = useState(initLocale);
-  const [stage, setStage] = useState(false);
-
-  // 获取当前current key
-  const pathname = props.location.pathname;
-  const key = pathname ? pathname.substr(1) : '';
-
-  useEffect(() => {
-    let s = null;
-    // TODO
-    s = createSocket();
-    return () => {
-      if (stage) {
-        s.close();
-      }
+class BasicLayout extends React.Component {
+  constructor(props) {
+    super();
+    this.state = {
+      language: getLocale(),
     };
-  }, [])
+    this.taskRemindInterval = null;
+    this.websocketServices = null;
+    // 获取当前current key
+    const pathname = props.location.pathname;
+    this.key = pathname ? pathname.substr(1) : '';
+  }
 
-  const onWrapTouchStart = e => {
-    // fix touch to scroll background page on iOS
-    if (!/iPhone|iPod|iPad/i.test(navigator.userAgent)) {
-      return;
-    }
-    const pNode = closest(e.target, '.am-modal-content');
-    if (!pNode) {
-      e.preventDefault();
-    }
-  };
+  componentDidMount() {
+    this.createSocket();
+    // this.socket = new Socket({
+    //   socketUrl: `ws://${window.configuration.ws}`,
+    //   timeout: 5000,
+    //   socketMessage: receive => {
+    //     console.log(receive); //后端返回的数据，渲染页面
+    //   },
+    //   socketClose: msg => {
+    //     console.log(msg);
+    //   },
+    //   socketError: () => {
+    //     console.log(this.state.taskStage + '连接建立失败');
+    //   },
+    //   socketOpen: () => {
+    //     console.log('连接建立成功');
+    //     // 心跳机制 定时向后端发数据
+    //     this.taskRemindInterval = setInterval(() => {
+    //       this.socket.sendMessage({ msgType: 0 });
+    //     }, 30000);
+    //   },
+    // });
 
-  function closest(el, selector) {
-    const matchesSelector =
-      el.matches || el.webkitMatchesSelector || el.mozMatchesSelector || el.msMatchesSelector;
-    while (el) {
-      if (matchesSelector.call(el, selector)) {
-        return el;
-      }
-      el = el.parentElement;
-    }
-    return null;
+    // // 重试创建socket连接;
+    // try {
+    //   this.socket.connection();
+    // } catch (e) {
+    //   // 捕获异常，防止js error
+    //   // donothing
+    // }
+  }
+
+  componentWillUnmount() {
+    this.websocketServices && this.websocketServices.onclose();
   }
 
   // 切换语言
-  const onLocaleChange = () => {
-    if (language === 'zh-CN') {
+  onLocaleChange = () => {
+    if (this.state.language === 'zh-CN') {
       setLocale('en-US');
-      setLanguage('en-US');
+      this.setState({ language: 'en-US' });
     } else {
       setLocale('zh-CN');
-      setLanguage('zh-CN');
+      this.setState({ language: 'zh-CN' });
     }
   };
 
   // 创建websocket连接
-  const createSocket = () => {
+  createSocket = () => {
     // const socketService = localStorage.getItem('lianmed_web_socket');
     // const params = {
     //   clientType: 'ctg-suit',
     //   token: 'eyJ1c2VybmFtZSI6ICJhZG1pbiIsInBhc3N3b3JkIjogImFkbWluIn0=',
     // };
     // const socketUrl = `ws://${socketService}/?${stringify(params)}`;
-    // const socketUrl = `ws://${socketService}`;
-    const socket = new Socket({
-      // socketUrl: socketUrl,
+    const socketUrl = `ws://${window.configuration.ws}`;
+    this.websocketServices = new Socket({
+      socketUrl: socketUrl,
       timeout: 5000,
       socketClose: msg => {
         console.log(msg);
       },
       socketError: () => {
-        setStage(false);
         Modal.alert('提示', '建立连接失败', [
           {
             text: '重新连接',
             onPress: () => {
               // 重试创建socket连接
               try {
-                socket.connection();
+                // this.websocketServices.connection();
+                const origin = window.location.origin;
+                window.location.href = `${origin}/#/scan`;
+                window.location.reload();
               } catch (e) {
                 // 捕获异常，防止js error
                 console.log('异常连接', e);
@@ -101,33 +110,38 @@ function BasicLayout(props) {
       },
       socketOpen: () => {
         console.log('连接建立成功');
-        setStage(true);
         // 心跳机制 定时向后端发数据
         // this.taskRemindInterval = setInterval(() => {
         //   this.socket.sendMessage({ msgType: 0 });
         // }, 30000);
       },
       socketMessage: receive => {
+        if (!receive.data.includes('{')) {
+          return;
+        }
         const result = JSON.parse(receive.data);
+
         const { name, data } = result;
         if (name === 'QRcode') {
           const arr = data.split(/[=#]/);
-          const userid = arr[1].slice(1, -1);
-          if (checkQRCode()) {
-            Toast.info('请使用围产保健-我的二维码')
+
+          const is = this.checkQRCode(arr[1]);
+          if (!is) {
+            Toast.info('请使用围产保健-我的二维码');
           } else {
-            getUSer(userid);
+            const userid = arr[1].slice(1, -1);
+            this.getUser(userid);
           }
         }
         if (name === 'SerialData') {
-          pushSerialData(data);
-          // console.log('object')
+          // this.pushSerialData(data);
+          this.serialData(data);
         }
       },
     });
     // 重试创建socket连接
     try {
-      socket.connection();
+      this.websocketServices.connection();
     } catch (e) {
       // 捕获异常，防止js error
       console.log('异常连接', e);
@@ -135,8 +149,8 @@ function BasicLayout(props) {
   };
 
   // 检验二维码的合法性
-  const checkQRCode = string => {
-    const res = /^Z([.*])J$/g;
+  checkQRCode = string => {
+    const res = /^Z.*J$/g;
     if (res.test(string)) {
       return true;
     } else {
@@ -144,45 +158,55 @@ function BasicLayout(props) {
     }
   };
 
-  const getUSer = (id) => {
-    props.dispatch({
+  getUser = id => {
+    this.props.dispatch({
       type: 'global/getDocById',
       payload: id,
     });
-  }
+  };
 
-  const pushSerialData = (data) => {
-    props.dispatch({
+  pushSerialData = data => {
+    this.props.dispatch({
       type: 'global/instackBuffer',
       payload: data,
     });
   };
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.left}>
-          <img className={styles.logo} src={logo} alt="lian-med logo" />
-          <span className={styles.title}>{formatMessage({ id: 'lianmed.title' })}</span>
+  serialData = data => {
+    this.props.dispatch({
+      type: 'global/getSerialData',
+      payload: data,
+    });
+  };
+
+  render() {
+    const { language } = this.state;
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div className={styles.left}>
+            {/* <img className={styles.logo} src={logo} alt="lian-med logo" /> */}
+            <span className={styles.title}>{formatMessage({ id: 'lianmed.title' })}</span>
+          </div>
+          {/* <a className={styles.locale} onClick={onLocaleChange}>
+            {language === 'zh-CN' ? 'ENGLISH' : '中文'}
+          </a> */}
         </div>
-        {/* <a className={styles.locale} onClick={onLocaleChange}>
-          {language === 'zh-CN' ? 'ENGLISH' : '中文'}
-        </a> */}
+        <div className={styles.content}>
+          <div className={styles.clock}>
+            <span className={styles.label}>{formatMessage({ id: 'lianmed.clock' })}</span>
+            <Clock />
+          </div>
+          <div className={styles.progress}>
+            <ProgressBar activeKey={this.key} />
+          </div>
+          <div className={styles.main}>{this.props.children}</div>
+          {/* <div className={styles.copyright}>Copyright © 广州莲印医疗科技</div> */}
+        </div>
+        <ActivityIndicator toast text="Loading..." animating={!!this.props.submitting} />
       </div>
-      <div className={styles.content}>
-        <div className={styles.clock}>
-          <span className={styles.label}>{formatMessage({ id: 'lianmed.clock' })}</span>
-          <Clock />
-        </div>
-        <div className={styles.progress}>
-          <ProgressBar activeKey={key} />
-        </div>
-        <div className={styles.main}>{props.children}</div>
-        {/* <div className={styles.copyright}>Copyright © 广州莲印医疗科技</div> */}
-      </div>
-      <ActivityIndicator toast text="Loading..." animating={!!props.submitting} />
-    </div>
-  );
+    );
+  }
 }
 
 export default connect(({ global, loading }) => ({

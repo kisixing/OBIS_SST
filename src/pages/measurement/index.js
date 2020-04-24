@@ -5,7 +5,7 @@ import Router from 'umi/router';
 import { formatMessage } from 'umi-plugin-locale';
 import CountDown from '../../components/CountDown';
 
-import gif from '../../assets/timg.jpg';
+import gif from '../../assets/timg1.gif';
 import styles from './index.less';
 
 const alert = Modal.alert;
@@ -100,7 +100,6 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted } 
             <p>我们可以开始测量血压了~</p>
             <p>请点击血压测量设备的开始按钮</p>
             <Button
-              type="primary"
               inline
               size="small"
               style={{ marginTop: '1.2rem' }}
