@@ -87,7 +87,7 @@ class BasicLayout extends React.Component {
       socketUrl: socketUrl,
       timeout: 5000,
       socketClose: msg => {
-        console.log(msg);
+        // console.log(msg);
       },
       socketError: () => {
         Modal.alert('提示', '建立连接失败', [
@@ -134,8 +134,8 @@ class BasicLayout extends React.Component {
           }
         }
         if (name === 'SerialData') {
-          // this.pushSerialData(data);
-          this.serialData(data);
+          this.pushSerialData(data);
+          // this.serialData(data);
         }
       },
     });

@@ -29,7 +29,7 @@ const GRADES = [
     label: '轻度高血压',
     tips: '血压偏高，请休息5~10分钟后再次测量。',
     key: 'higher',
-    min: [91, 100],
+    min: [90, 100],
     max: [140, 160],
     color: '#FF9900'
   },
@@ -44,6 +44,7 @@ const GRADES = [
 ];
 
 function Result({ dispatch, result, user }) {
+  const [count, setCount] = useState(5);
   const [value, setValue] = useState([
     { label: '血压', value: [] },
     { lable: '心率', value: '' },
@@ -67,24 +68,43 @@ function Result({ dispatch, result, user }) {
       ]);
     }
 
-    return function cleanup() {};
-  }, [result]);
+    const tick = () => {
+      if (count === 0) {
+        onSave();
+      }
+      const second = count - 1;
+      return setCount(second)
+    }
+    const interval = setInterval(() => tick(), 1000);
+
+    return function cleanup() {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [result, count]);
 
   // 判断血压是否在正常
   const judgeGrade = (h, l) => {
     let index = 1; // 正常血压
-    if (h >= 160 || l >= 100) {
-      //高血压
-      index = 3;
+    // if ((h >= 90 && h <= 140) && (l >= 60 && l <= 90)) {
+    //   index = 1;
+    // } else {
+
+    // }
+    if (h < 90 || l < 60) {
+      // 低血压
+      index = 0;
     }
     if ((h > 140 && h < 160) || (l > 90 && l < 100)) {
       // 轻度高血压
       index = 2;
     }
-    if (h < 90 || l < 60) {
-      // 低血压
-      index = 0;
+    if (h >= 160 || l >= 100) {
+      //高血压
+      index = 3;
     }
+
     // console.log('object', GRADES[index]);
     setGrade(GRADES[index])
   }
@@ -107,6 +127,11 @@ function Result({ dispatch, result, user }) {
     ]);
   };
 
+  const onSubmit = () => {
+    setCount(-1)
+    onSave()
+  }
+
   const onSave = () => {
     // countDown();
     setLoading(true);
@@ -119,9 +144,12 @@ function Result({ dispatch, result, user }) {
       payload: {
         userid: user.id,
         date: moment(result[2] + ' ' + result[3]).format('YYYY-MM-DD HH:mm:ss'),
-        diastolicpressure: result[6].replace(/\b(0+)/gi, ''),
-        shrinkpressure: result[4].replace(/\b(0+)/gi, ''),
-        heartrate: result[7].replace(/\b(0+)/gi, ''),
+        // shrinkpressure: result[4].replace(/\b(0+)/gi, ''),
+		    // diastolicpressure: result[5].replace(/\b(0+)/gi, ''),
+        // heartrate: result[6].replace(/\b(0+)/gi, ''),
+        shrinkpressure: value[0]['value'][0],
+        diastolicpressure: value[0]['value'][1],
+        heartrate: value[1]['value']
       },
     }).then(res => {
       if (res && res.code === '1') {
@@ -132,7 +160,7 @@ function Result({ dispatch, result, user }) {
   };
 
   const countDown = () => {
-    let secondsToGo = 15;
+    let secondsToGo = 10;
     const alertInstance = alert(
       '提示',
       <div>
@@ -162,6 +190,7 @@ function Result({ dispatch, result, user }) {
     );
     setTimeout(() => {
       alertInstance.close();
+      Router.push('/scan');
     }, secondsToGo * 1000);
   }
 
@@ -203,8 +232,15 @@ function Result({ dispatch, result, user }) {
         <Button inline type="ghost" onClick={remeasure}>
           {formatMessage({ id: 'lianmed.remeasure' })}
         </Button>
-        <Button inline type="primary" loading={loading} disabled={!result} onClick={onSave}>
+        <Button
+          inline
+          type="primary"
+          loading={loading}
+          disabled={loading} //  || !value[1]['value']
+          onClick={onSubmit}
+        >
           {formatMessage({ id: 'lianmed.save' })}
+          {count && count > 0 ? `（${count}S）` : ''}
         </Button>
       </div>
     </div>
