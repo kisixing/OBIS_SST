@@ -10,9 +10,7 @@ import Socket from '../utils/webSocket';
 import Clock from '../components/Clock';
 import ProgressBar from './ProgressBar';
 
-import logo from '../assets/logo.png';
 import styles from './BasicLayout.less';
-import { render } from 'react-dom';
 
 class BasicLayout extends React.Component {
   constructor(props) {
@@ -90,23 +88,23 @@ class BasicLayout extends React.Component {
         // console.log(msg);
       },
       socketError: () => {
-        Modal.alert('提示', '建立连接失败', [
-          {
-            text: '重新连接',
-            onPress: () => {
-              // 重试创建socket连接
-              try {
-                // this.websocketServices.connection();
-                const origin = window.location.origin;
-                window.location.href = `${origin}/#/scan`;
-                window.location.reload();
-              } catch (e) {
-                // 捕获异常，防止js error
-                console.log('异常连接', e);
-              }
-            },
-          },
-        ]);
+        // Modal.alert('提示', '建立连接失败', [
+        //   {
+        //     text: '重新连接',
+        //     onPress: () => {
+        //       // 重试创建socket连接
+        //       try {
+        //         // this.websocketServices.connection();
+        //         const origin = window.location.origin;
+        //         window.location.href = `${origin}/#/scan`;
+        //         window.location.reload();
+        //       } catch (e) {
+        //         // 捕获异常，防止js error
+        //         console.log('异常连接', e);
+        //       }
+        //     },
+        //   },
+        // ]);
       },
       socketOpen: () => {
         console.log('连接建立成功');
@@ -181,6 +179,8 @@ class BasicLayout extends React.Component {
 
   render() {
     const { language } = this.state;
+    const pathname = this.props.location.pathname;
+    const key = pathname ? pathname.substr(1) : '';
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -198,7 +198,7 @@ class BasicLayout extends React.Component {
             <Clock />
           </div>
           <div className={styles.progress}>
-            <ProgressBar activeKey={this.key} />
+            <ProgressBar activeKey={key} />
           </div>
           <div className={styles.main}>{this.props.children}</div>
           {/* <div className={styles.copyright}>Copyright © 广州莲印医疗科技</div> */}

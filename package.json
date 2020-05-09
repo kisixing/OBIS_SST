@@ -5,7 +5,7 @@
     "build": "umi build",
     "test": "umi test",
     "lint": "eslint --ext .js src mock tests",
-
+    "precommit": "lint-staged"
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",

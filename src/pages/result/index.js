@@ -56,8 +56,8 @@ function Result({ dispatch, result, user }) {
   useEffect(() => {
     if (result.length) {
       const hBP = result[4].replace(/\b(0+)/gi, '');
-      const lBP = result[5].replace(/\b(0+)/gi, '');
-      const rate = result[6].replace(/\b(0+)/gi, '');
+      const lBP = result[6].replace(/\b(0+)/gi, '');
+      const rate = result[7].replace(/\b(0+)/gi, '');
       judgeGrade(hBP * 1, lBP * 1);
       setValue([
         {
@@ -69,7 +69,7 @@ function Result({ dispatch, result, user }) {
     }
 
     const tick = () => {
-      if (count === 0) {
+      if (user && user.id && count === 0) {
         onSave();
       }
       const second = count - 1;
@@ -133,7 +133,6 @@ function Result({ dispatch, result, user }) {
   }
 
   const onSave = () => {
-    // countDown();
     setLoading(true);
     if (!result.length) {
       setLoading(false);
@@ -145,8 +144,8 @@ function Result({ dispatch, result, user }) {
         userid: user.id,
         date: moment(result[2] + ' ' + result[3]).format('YYYY-MM-DD HH:mm:ss'),
         // shrinkpressure: result[4].replace(/\b(0+)/gi, ''),
-		    // diastolicpressure: result[5].replace(/\b(0+)/gi, ''),
-        // heartrate: result[6].replace(/\b(0+)/gi, ''),
+		    // diastolicpressure: result[6].replace(/\b(0+)/gi, ''),
+        // heartrate: result[7].replace(/\b(0+)/gi, ''),
         shrinkpressure: value[0]['value'][0],
         diastolicpressure: value[0]['value'][1],
         heartrate: value[1]['value']
@@ -194,6 +193,18 @@ function Result({ dispatch, result, user }) {
     }, secondsToGo * 1000);
   }
 
+  const backHome = () => {
+    dispatch({
+      type: 'global/updateState',
+      payload: {
+        user: {},
+        result: [],
+        buffer: [],
+      },
+    });
+    Router.push('/scan');
+  }
+
   return (
     <div className={styles.page}>
       <ul className={styles.grade}>
@@ -232,16 +243,18 @@ function Result({ dispatch, result, user }) {
         <Button inline type="ghost" onClick={remeasure}>
           {formatMessage({ id: 'lianmed.remeasure' })}
         </Button>
-        <Button
-          inline
-          type="primary"
-          loading={loading}
-          disabled={loading} //  || !value[1]['value']
-          onClick={onSubmit}
-        >
-          {formatMessage({ id: 'lianmed.save' })}
-          {count && count > 0 ? `（${count}S）` : ''}
-        </Button>
+        {user && user.id ? (
+          <Button
+            inline
+            type="primary"
+            loading={loading}
+            disabled={loading} //  || !value[1]['value']
+            onClick={onSubmit}
+          >
+            {formatMessage({ id: 'lianmed.save' })}
+            {count && count > 0 ? `（${count}S）` : ''}
+          </Button>
+        ) : (<Button inline type="primary" onClick={backHome}>返回首页</Button>)}
       </div>
     </div>
   );
