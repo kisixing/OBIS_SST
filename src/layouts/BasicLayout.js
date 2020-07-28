@@ -2,9 +2,9 @@
 /**
  * layout布局 header conten footer
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { connect } from 'dva';
-import { Modal, List, InputItem, Toast, ActivityIndicator } from 'antd-mobile';
+import {Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
 import Socket from '../utils/webSocket';
 import Clock from '../components/Clock';
@@ -26,6 +26,14 @@ class BasicLayout extends React.Component {
   }
 
   componentDidMount() {
+    // 登录操作
+    this.props.dispatch({
+      type: 'global/login',
+      payload: {
+        username: 'admin',
+        password: 'admin'
+      }
+    })
     this.createSocket();
     // this.socket = new Socket({
     //   socketUrl: `ws://${window.configuration.ws}`,
@@ -121,13 +129,14 @@ class BasicLayout extends React.Component {
 
         const { name, data } = result;
         if (name === 'QRcode') {
+          const res = /^Z.*J$/g;
           const arr = data.split(/[=#]/);
-
-          const is = this.checkQRCode(arr[1]);
-          if (!is) {
+          const index = arr.findIndex(e => res.test(e))
+          // const is = this.checkQRCode(arr[index]);
+          if (index === -1) {
             Toast.info('请使用围产保健-我的二维码');
           } else {
-            const userid = arr[1].slice(1, -1);
+            const userid = arr[index].slice(1, -1);
             this.getUser(userid);
           }
         }
@@ -178,7 +187,7 @@ class BasicLayout extends React.Component {
   };
 
   render() {
-    const { language } = this.state;
+    // const { language } = this.state;
     const pathname = this.props.location.pathname;
     const key = pathname ? pathname.substr(1) : '';
     return (

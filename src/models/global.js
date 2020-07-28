@@ -1,6 +1,6 @@
-import { Modal } from 'antd-mobile';
+import { Modal, Toast } from 'antd-mobile';
 import routerRedux  from 'umi/router';
-import { getDocById, getDocByMobile, insertBgRecord } from '@/services/api';
+import { getDocById, getDocByMobile, insertBgRecord, auth } from '@/services/api';
 
 function hexToString(str) {
   if (str.length % 2 !== 0) {
@@ -26,6 +26,12 @@ export default {
   },
 
   effects: {
+    *login({ payload }, { call, put }) {
+      const response = yield call(auth, payload);
+      if (response && response.id_token) {
+        sessionStorage.setItem('access_token', response.id_token)
+      }
+    },
     *getDocById({ payload }, { call, put }) {
       const response = yield call(getDocById, payload);
       if (response && response.code === '1') {
@@ -45,6 +51,9 @@ export default {
           }),
         );
       }
+      if (response && response.code === 10002) {
+        Toast.info('不存在的用户')
+      }
     },
     *getDocByMobile({ payload }, { call, put }) {
       const response = yield call(getDocByMobile, payload);
@@ -60,7 +69,7 @@ export default {
     },
     *getSerialData({ payload }, { call, put }) {
       const hex = payload;
-      const reg = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{3},[0-9]{3},[0-9]{3},[0-9]{3}\,\d\r/;
+      // const reg = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{3},[0-9]{3},[0-9]{3},[0-9]{3}\,\d\r/;
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
         const arr = string.split(',');

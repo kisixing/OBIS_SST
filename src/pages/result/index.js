@@ -21,7 +21,7 @@ const GRADES = [
     label: '正常',
     key: 'normal',
     tips: '血压正常，请继续保持。',
-    min: [60, 90],
+    min: [50, 90],
     max: [80, 140],
     color: '#80E680'
   },
@@ -82,7 +82,7 @@ function Result({ dispatch, result, user }) {
         clearInterval(interval);
       }
     };
-  }, [result, count]);
+  }, [result, count, user, onSave]);
 
   // 判断血压是否在正常
   const judgeGrade = (h, l) => {
@@ -92,7 +92,7 @@ function Result({ dispatch, result, user }) {
     // } else {
 
     // }
-    if (h < 90 || l < 60) {
+    if (h < 90 || l < 50) {
       // 低血压
       index = 0;
     }
@@ -132,7 +132,7 @@ function Result({ dispatch, result, user }) {
     onSave()
   }
 
-  const onSave = () => {
+  const onSave = useCallback(() => {
     setLoading(true);
     if (!result.length) {
       setLoading(false);
@@ -156,7 +156,7 @@ function Result({ dispatch, result, user }) {
         countDown();
       }
     });
-  };
+  });
 
   const countDown = () => {
     let secondsToGo = 10;

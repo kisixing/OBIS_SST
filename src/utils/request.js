@@ -58,4 +58,24 @@ const request = extend({
   },
 });
 
+/**
+ * request interceptor, change url or options.
+ */
+request.interceptors.request.use((url, options) => {
+  let access_token = sessionStorage.getItem('access_token');
+  options.headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json;charset=UTF-8',
+    Authorization: `Bearer ${access_token}`,
+    ...options.headers,
+  };
+  return ({
+      url,
+      options: {
+        ...options,
+      },
+    }
+  );
+});
+
 export default request;

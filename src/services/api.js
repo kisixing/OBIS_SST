@@ -1,4 +1,4 @@
-import { stringify } from 'querystring';
+// import { stringify } from 'querystring';
 import request from '../utils/request';
 
 const url = `http://${window.location.host}`;
@@ -22,5 +22,14 @@ export async function insertBgRecord(params) {
   return request(`${base_url}/api/insertBgRecord`, {
     method: 'POST',
     data: params,
+  });
+}
+
+export async function auth(data) {
+  return request(`${base_url}/api/authenticate`, {
+    method: 'POST',
+    data: {
+      ...data
+    },
   });
 }
