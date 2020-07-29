@@ -5,6 +5,7 @@ import { resolve } from 'path';
 export default {
   treeShaking: true,
   history: 'hash',
+  hash: true,
   routes: [
     {
       path: '/',

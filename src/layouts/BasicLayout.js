@@ -26,14 +26,14 @@ class BasicLayout extends React.Component {
   }
 
   componentDidMount() {
-    // 登录操作
-    this.props.dispatch({
-      type: 'global/login',
-      payload: {
-        username: 'admin',
-        password: 'admin'
-      }
-    })
+    // // 登录操作
+    // this.props.dispatch({
+    //   type: 'global/login',
+    //   payload: {
+    //     username: 'admin',
+    //     password: 'admin'
+    //   }
+    // })
     this.createSocket();
     // this.socket = new Socket({
     //   socketUrl: `ws://${window.configuration.ws}`,
