@@ -26,14 +26,14 @@ class BasicLayout extends React.Component {
   }
 
   componentDidMount() {
-    // // 登录操作
-    // this.props.dispatch({
-    //   type: 'global/login',
-    //   payload: {
-    //     username: 'admin',
-    //     password: 'admin'
-    //   }
-    // })
+    // 登录操作
+    this.props.dispatch({
+      type: 'global/login',
+      payload: {
+        username: 'admin',
+        password: 'admin'
+      }
+    })
     this.createSocket();
     // this.socket = new Socket({
     //   socketUrl: `ws://${window.configuration.ws}`,
@@ -129,6 +129,7 @@ class BasicLayout extends React.Component {
 
         const { name, data } = result;
         if (name === 'QRcode') {
+          console.log('扫码信息ws data -->', data)
           const res = /^Z.*J$/g;
           const arr = data.split(/[=#]/);
           const index = arr.findIndex(e => res.test(e))
@@ -141,6 +142,7 @@ class BasicLayout extends React.Component {
           }
         }
         if (name === 'SerialData') {
+          console.log('测量数据ws data -->', data)
           this.pushSerialData(data);
           // this.serialData(data);
         }

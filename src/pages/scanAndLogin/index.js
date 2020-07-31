@@ -67,12 +67,12 @@ function ScanAndLogin(props) {
       type: 'global/getDocByMobile',
       payload: mobile
     }).then(res => {
-      if (res && res.code === '1') {
-        const data = res.object;
+      if (res && res.id) {
+        const data = { ...res };
         Router.push({
           pathname: '/measurement',
           query: {
-            name: data.username,
+            name: data.name,
             id: data.id,
           },
         });

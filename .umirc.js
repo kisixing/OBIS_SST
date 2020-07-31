@@ -55,7 +55,7 @@ export default {
           },
         ],
         links: [{ rel: 'icon', href: '/favicon.png', type: 'image/x-icon' }],
-        headScripts: [{ src: '/config.js' }],
+        headScripts: [{ src: `<%= PUBLIC_PATH %>config.js?timestamp=${new Date().getTime()}` },],
       },
     ],
   ],

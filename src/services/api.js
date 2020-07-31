@@ -10,12 +10,7 @@ export async function getDocByMobile(mobile) {
 
 // api/get/useryc
 export async function getDocById(id) {
-  return request(`${base_url}/api/get/useryc`, {
-    method: 'POST',
-    data: {
-      userid: id,
-    },
-  });
+  return request(`${base_url}/api/get/useryc?userid=${id}`);
 }
 
 export async function insertBgRecord(params) {

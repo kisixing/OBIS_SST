@@ -34,34 +34,34 @@ export default {
     },
     *getDocById({ payload }, { call, put }) {
       const response = yield call(getDocById, payload);
-      if (response && response.code === '1') {
+      if (response && response.id) {
         yield put({
           type: 'updateState',
           payload: {
-            user: response.object,
+            user: response,
           },
         });
         yield put(
           routerRedux.push({
             pathname: '/measurement',
             query: {
-              name: response.object.username,
-              id: response.object.id,
+              name: response.name,
+              id: response.id,
             },
           }),
         );
       }
-      if (response && response.code === 10002) {
+      if (response && !response.id) {
         Toast.info('不存在的用户')
       }
     },
     *getDocByMobile({ payload }, { call, put }) {
       const response = yield call(getDocByMobile, payload);
-      if (response && response.code === '1') {
+      if (response && response.id) {
         yield put({
           type: 'updateState',
           payload: {
-            user: response.object,
+            user: response,
           },
         });
       }

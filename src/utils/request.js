@@ -51,11 +51,29 @@ const errorHandler = error => {
 const request = extend({
   errorHandler, // 默认错误处理
   // credentials: 'include', // 默认请求是否带上cookie
-  requestType: 'form',
+  requestType: 'json',
   headers: {
-    Accept: '*/*',
-    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    Accept: 'application/json',
+    'Content-Type': 'application/json;charset=UTF-8',
   },
+});
+
+/**
+ * request interceptor, change url or options.
+ */
+request.interceptors.request.use((url, options) => {
+  let access_token = sessionStorage.getItem('access_token');
+  options.headers = {
+    Authorization: `Bearer ${access_token}`,
+    ...options.headers,
+  };
+  return ({
+      url,
+      options: {
+        ...options,
+      },
+    }
+  );
 });
 
 export default request;
