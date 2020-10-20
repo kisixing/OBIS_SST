@@ -25,6 +25,11 @@ function ScanAndLogin(props) {
   };
 
   const gridClick = e => {
+    // 根据配置条件设置是否可使用平板输入组件
+    const editable = window.configuration.editable;
+    if (!editable) {
+      return Toast.info('请使用“围产卡”扫码测量血压')
+    }
     // 是否可以继续输入
     // 清除空格
     e.preventDefault();
