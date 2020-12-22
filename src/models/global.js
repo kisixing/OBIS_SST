@@ -67,13 +67,16 @@ export default {
       }
       return response;
     },
-    *getSerialData({ payload }, { call, put }) {
+    *getSerialData({ payload }, { call, put, select }) {
+      const user = yield select(_ => _.global.user)
+      if (user && !user.id) {
+        return
+      }
       const hex = payload;
-      // const reg = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{3},[0-9]{3},[0-9]{3},[0-9]{3}\,\d\r/;
+      // const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1}\n|\r/;
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
         const arr = string.split(',');
-        // console.log('8888888', hex, string, arr)
         yield put({
           type: 'updateState',
           payload: {
@@ -104,10 +107,14 @@ export default {
       return response;
     },
     *instackBuffer({ payload }, { put, select }) {
+      const user = yield select(_ => _.global.user)
+      if (user && !user.id) {
+        return
+      }
       let buffer = yield select(_ => _.global.buffer);
       buffer.push(payload);
       const hex = buffer.join('');
-      const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{3},[0-9]{3},[0-9]{3},[0-9]{3}\,\d\r/;
+      const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1}\n|\r/;
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
         if (!res.test(string)) {

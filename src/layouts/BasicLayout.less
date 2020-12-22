@@ -10,6 +10,7 @@
 .header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 6px 12px;
   background: @brand-primary;
   box-shadow: 0 2px 8px #ccc;
@@ -34,11 +35,22 @@
     }
   }
 
+  .right {
+    display: inline-flex;
+    align-items: center;
+    .locale {
+      font-size: 8px;
+      color: #fff;
+    }
 
-
-  .locale {
-    font-size: 8px;
-    color: #fff;
+    .status {
+      display: inline-block;
+      width: 10px;
+      height: 5px;
+      border-radius: 5px;
+      background-color: @brand-error;
+      color: @brand-error;
+    }
   }
 }
 

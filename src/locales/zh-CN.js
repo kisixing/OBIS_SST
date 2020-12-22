@@ -1,6 +1,6 @@
 export default {
   // layout
-  'lianmed.title': '自助血压测量',
+  'lianmed.title': '自助血压测量 v1',
   'lianmed.start': '开始！',
   'lianmed.language': '中文',
   'lianmed.clock': '当前时间：',

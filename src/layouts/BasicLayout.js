@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { connect } from 'dva';
-import {Toast, ActivityIndicator } from 'antd-mobile';
+import {Toast, Modal, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
 import Socket from '../utils/webSocket';
 import Clock from '../components/Clock';
@@ -17,6 +17,7 @@ class BasicLayout extends React.Component {
     super();
     this.state = {
       language: getLocale(),
+      status: false
     };
     this.taskRemindInterval = null;
     this.websocketServices = null;
@@ -96,6 +97,16 @@ class BasicLayout extends React.Component {
         // console.log(msg);
       },
       socketError: () => {
+        this.setState({ status: false })
+        // 重试创建socket连接
+        try {
+          setTimeout(() => {
+            window.location.reload();
+          }, 10000);
+        } catch (e) {
+          // 捕获异常，防止js error
+          console.log('异常连接', e);
+        }
         // Modal.alert('提示', '建立连接失败', [
         //   {
         //     text: '重新连接',
@@ -115,6 +126,7 @@ class BasicLayout extends React.Component {
         // ]);
       },
       socketOpen: () => {
+        this.setState({ status: true })
         console.log('连接建立成功');
         // 心跳机制 定时向后端发数据
         // this.taskRemindInterval = setInterval(() => {
@@ -155,6 +167,10 @@ class BasicLayout extends React.Component {
     }
   };
 
+  reload = () => {
+    window.location.reload();
+  }
+
   // 检验二维码的合法性
   checkQRCode = string => {
     const res = /^Z.*J$/g;
@@ -187,7 +203,7 @@ class BasicLayout extends React.Component {
   };
 
   render() {
-    // const { language } = this.state;
+    const { status } = this.state;
     const pathname = this.props.location.pathname;
     const key = pathname ? pathname.substr(1) : '';
     return (
@@ -197,9 +213,12 @@ class BasicLayout extends React.Component {
             {/* <img className={styles.logo} src={logo} alt="lian-med logo" /> */}
             <span className={styles.title}>{formatMessage({ id: 'lianmed.title' })}</span>
           </div>
-          {/* <a className={styles.locale} onClick={onLocaleChange}>
-            {language === 'zh-CN' ? 'ENGLISH' : '中文'}
-          </a> */}
+          <div className={styles.right}>
+            {/* <a className={styles.locale} onClick={onLocaleChange}>
+              {language === 'zh-CN' ? 'ENGLISH' : '中文'}
+            </a> */}
+            {!status && <a slt="status" className={styles.status} onClick={this.reload}></a>}
+          </div>
         </div>
         <div className={styles.content}>
           <div className={styles.clock}>

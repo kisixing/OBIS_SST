@@ -77,7 +77,16 @@ function Result({ dispatch, result, user }) {
     }
     const interval = setInterval(() => tick(), 1000);
 
-    return function cleanup() {
+    return () => {
+      // // 离开结果页，情况用户信息
+      // dispatch({
+      //   type: 'global/updateState',
+      //   payload: {
+      //     user: {},
+      //     result: [],
+      //     buffer: [],
+      //   },
+      // });
       if (interval) {
         clearInterval(interval);
       }
@@ -174,22 +183,14 @@ function Result({ dispatch, result, user }) {
         {
           text: '确定',
           onPress: () => {
-            dispatch({
-              type: 'global/updateState',
-              payload: {
-                user: {},
-                result: [],
-                buffer: [],
-              },
-            });
-            Router.push('/scan');
+            backHome()
           },
         },
       ],
     );
     setTimeout(() => {
       alertInstance.close();
-      Router.push('/scan');
+      backHome()
     }, secondsToGo * 1000);
   }
 
