@@ -69,7 +69,7 @@ export default {
     },
     *getSerialData({ payload }, { call, put }) {
       const hex = payload;
-      // const reg = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{3},[0-9]{3},[0-9]{3},[0-9]{3}\,\d\r/;
+      // const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1}\n|\r/;
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
         const arr = string.split(',');
@@ -107,7 +107,7 @@ export default {
       let buffer = yield select(_ => _.global.buffer);
       buffer.push(payload);
       const hex = buffer.join('');
-      const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{3},[0-9]{3},[0-9]{3},[0-9]{3}\,\d\r/;
+      const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1}\n|\r/;
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
         if (!res.test(string)) {
