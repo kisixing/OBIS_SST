@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { connect } from 'dva';
-import {Toast, ActivityIndicator } from 'antd-mobile';
+import { Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
 import Socket from '../utils/webSocket';
 import Clock from '../components/Clock';
@@ -31,9 +31,9 @@ class BasicLayout extends React.Component {
       type: 'global/login',
       payload: {
         username: 'admin',
-        password: 'admin'
-      }
-    })
+        password: 'admin',
+      },
+    });
     this.createSocket();
     // this.socket = new Socket({
     //   socketUrl: `ws://${window.configuration.ws}`,
@@ -128,11 +128,11 @@ class BasicLayout extends React.Component {
         const result = JSON.parse(receive.data);
 
         const { name, data } = result;
-        if (name === 'QRcode') {
-          console.log('扫码信息ws data -->', data)
+        if (name === 'QRcode' && data !== 'www.vguang.cn') {
+          console.log('扫码信息ws data -->', data);
           const res = /^Z.*J$/g;
           const arr = data.split(/[=#]/);
-          const index = arr.findIndex(e => res.test(e))
+          const index = arr.findIndex(e => res.test(e));
           // const is = this.checkQRCode(arr[index]);
           if (index === -1) {
             Toast.info('请使用围产保健-我的二维码');
@@ -142,7 +142,7 @@ class BasicLayout extends React.Component {
           }
         }
         if (name === 'SerialData') {
-          console.log('测量数据ws data -->', data)
+          console.log('测量数据ws data -->', data);
           this.pushSerialData(data);
           // this.serialData(data);
         }
