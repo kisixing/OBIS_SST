@@ -1,5 +1,5 @@
 import { Modal, Toast } from 'antd-mobile';
-import routerRedux  from 'umi/router';
+import routerRedux from 'umi/router';
 import { getDocById, getDocByMobile, insertBgRecord, auth } from '@/services/api';
 
 function hexToString(str) {
@@ -22,14 +22,14 @@ export default {
     user: {},
     buffer: [],
     result: [],
-    checkCompleted: false
+    checkCompleted: false,
   },
 
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(auth, payload);
       if (response && response.id_token) {
-        sessionStorage.setItem('access_token', response.id_token)
+        sessionStorage.setItem('access_token', response.id_token);
       }
     },
     *getDocById({ payload }, { call, put }) {
@@ -52,7 +52,7 @@ export default {
         );
       }
       if (response && !response.id) {
-        Toast.info('不存在的用户')
+        Toast.info('不存在的用户');
       }
     },
     *getDocByMobile({ payload }, { call, put }) {
@@ -78,11 +78,9 @@ export default {
           type: 'updateState',
           payload: {
             result: arr,
-          }
-        })
-        yield put(
-          routerRedux.push('/result'),
-        );
+          },
+        });
+        yield put(routerRedux.push('/result'));
       } else {
         Modal.alert('提示', '测量失败，请重新测量', [
           {
@@ -104,6 +102,10 @@ export default {
       return response;
     },
     *instackBuffer({ payload }, { put, select }) {
+      const user = yield select(_ => _.global.user);
+      if (user && !user.id) {
+        return;
+      }
       let buffer = yield select(_ => _.global.buffer);
       buffer.push(payload);
       const hex = buffer.join('');
@@ -111,37 +113,40 @@ export default {
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
         if (!res.test(string)) {
-          Modal.alert('提示', '测量失败，请重新测量', [{ text: '确定', onPress: () => {
-            put({
-              type: 'updateState',
-              payload: {
-                result: [],
-                buffer: [],
+          Modal.alert('提示', '测量失败，请重新测量', [
+            {
+              text: '确定',
+              onPress: () => {
+                put({
+                  type: 'updateState',
+                  payload: {
+                    result: [],
+                    buffer: [],
+                  },
+                });
               },
-            });
-          } }]);
+            },
+          ]);
         } else {
-          const arr = string.split(',')
+          const arr = string.split(',');
           yield put({
             type: 'updateState',
             payload: {
               result: arr,
-              buffer: []
-            }
-          })
-          yield put(
-            routerRedux.push('/result'),
-          );
+              buffer: [],
+            },
+          });
+          yield put(routerRedux.push('/result'));
         }
       } else {
         yield put({
           type: 'updateState',
           payload: {
             buffer,
-          }
-        })
+          },
+        });
       }
-    }
+    },
   },
 
   reducers: {

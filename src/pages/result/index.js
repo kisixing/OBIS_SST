@@ -15,7 +15,7 @@ const GRADES = [
     tips: '血压偏低，请休息5~10分钟后再次测量。',
     min: [0, 59],
     max: [0, 89],
-    color: '#2B89F7'
+    color: '#2B89F7',
   },
   {
     label: '正常',
@@ -23,7 +23,7 @@ const GRADES = [
     tips: '血压正常，请继续保持。',
     min: [50, 90],
     max: [80, 140],
-    color: '#80E680'
+    color: '#80E680',
   },
   {
     label: '轻度高血压',
@@ -31,7 +31,7 @@ const GRADES = [
     key: 'higher',
     min: [90, 100],
     max: [140, 160],
-    color: '#FF9900'
+    color: '#FF9900',
   },
   {
     label: '高血压',
@@ -39,7 +39,7 @@ const GRADES = [
     key: 'highest',
     min: [100, 999],
     max: [160, 999],
-    color: '#FF0000'
+    color: '#FF0000',
   },
 ];
 
@@ -73,8 +73,8 @@ function Result({ dispatch, result, user }) {
         onSave();
       }
       const second = count - 1;
-      return setCount(second)
-    }
+      return setCount(second);
+    };
     const interval = setInterval(() => tick(), 1000);
 
     return function cleanup() {
@@ -106,8 +106,8 @@ function Result({ dispatch, result, user }) {
     }
 
     // console.log('object', GRADES[index]);
-    setGrade(GRADES[index])
-  }
+    setGrade(GRADES[index]);
+  };
   // judgeGrade();
 
   // 重新测量血压
@@ -128,15 +128,15 @@ function Result({ dispatch, result, user }) {
   };
 
   const onSubmit = () => {
-    setCount(-1)
-    onSave()
-  }
+    setCount(-1);
+    onSave();
+  };
 
   const onSave = useCallback(() => {
     setLoading(true);
     if (!result.length) {
       setLoading(false);
-      return Toast.info('您还未测试血压！')
+      return Toast.info('您还未测试血压！');
     }
     dispatch({
       type: 'global/insertBgRecord',
@@ -144,11 +144,11 @@ function Result({ dispatch, result, user }) {
         userid: user.id,
         date: moment(result[2] + ' ' + result[3]).format('YYYY-MM-DD HH:mm:ss'),
         // shrinkpressure: result[4].replace(/\b(0+)/gi, ''),
-		    // diastolicpressure: result[6].replace(/\b(0+)/gi, ''),
+        // diastolicpressure: result[6].replace(/\b(0+)/gi, ''),
         // heartrate: result[7].replace(/\b(0+)/gi, ''),
         shrinkpressure: value[0]['value'][0],
         diastolicpressure: value[0]['value'][1],
-        heartrate: value[1]['value']
+        heartrate: value[1]['value'],
       },
     }).then(res => {
       if (res && res.code === '1') {
@@ -173,25 +173,15 @@ function Result({ dispatch, result, user }) {
       [
         {
           text: '确定',
-          onPress: () => {
-            dispatch({
-              type: 'global/updateState',
-              payload: {
-                user: {},
-                result: [],
-                buffer: [],
-              },
-            });
-            Router.push('/scan');
-          },
+          onPress: () => backHome(),
         },
       ],
     );
     setTimeout(() => {
       alertInstance.close();
-      Router.push('/scan');
+      backHome();
     }, secondsToGo * 1000);
-  }
+  };
 
   const backHome = () => {
     dispatch({
@@ -203,7 +193,7 @@ function Result({ dispatch, result, user }) {
       },
     });
     Router.push('/scan');
-  }
+  };
 
   return (
     <div className={styles.page}>
@@ -230,8 +220,8 @@ function Result({ dispatch, result, user }) {
       </ul>
       <div className={styles.score}>
         <span style={{ marginRight: '0.4rem' }}>
-          {formatMessage({ id: 'lianmed.BloodPressure' })}：
-          {value[0]['value'][0]} / {value[0]['value'][1]}
+          {formatMessage({ id: 'lianmed.BloodPressure' })}：{value[0]['value'][0]} /{' '}
+          {value[0]['value'][1]}
           <span className={styles.unit}>mmHg</span>
         </span>
         <span>
@@ -254,7 +244,11 @@ function Result({ dispatch, result, user }) {
             {formatMessage({ id: 'lianmed.save' })}
             {count && count > 0 ? `（${count}S）` : ''}
           </Button>
-        ) : (<Button inline type="primary" onClick={backHome}>返回首页</Button>)}
+        ) : (
+          <Button inline type="primary" onClick={backHome}>
+            返回首页
+          </Button>
+        )}
       </div>
     </div>
   );

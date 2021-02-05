@@ -6,6 +6,7 @@ import React from 'react';
 import { connect } from 'dva';
 import { Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 import Socket from '../utils/webSocket';
 import Clock from '../components/Clock';
 import ProgressBar from './ProgressBar';
@@ -35,34 +36,6 @@ class BasicLayout extends React.Component {
       },
     });
     this.createSocket();
-    // this.socket = new Socket({
-    //   socketUrl: `ws://${window.configuration.ws}`,
-    //   timeout: 5000,
-    //   socketMessage: receive => {
-    //     console.log(receive); //后端返回的数据，渲染页面
-    //   },
-    //   socketClose: msg => {
-    //     console.log(msg);
-    //   },
-    //   socketError: () => {
-    //     console.log(this.state.taskStage + '连接建立失败');
-    //   },
-    //   socketOpen: () => {
-    //     console.log('连接建立成功');
-    //     // 心跳机制 定时向后端发数据
-    //     this.taskRemindInterval = setInterval(() => {
-    //       this.socket.sendMessage({ msgType: 0 });
-    //     }, 30000);
-    //   },
-    // });
-
-    // // 重试创建socket连接;
-    // try {
-    //   this.socket.connection();
-    // } catch (e) {
-    //   // 捕获异常，防止js error
-    //   // donothing
-    // }
   }
 
   componentWillUnmount() {
