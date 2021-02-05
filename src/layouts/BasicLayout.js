@@ -4,10 +4,9 @@
  */
 import React from 'react';
 import { connect } from 'dva';
-import { Toast, ActivityIndicator } from 'antd-mobile';
+import { Modal, Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
 import ReconnectingWebSocket from 'reconnecting-websocket';
-import Socket from '../utils/webSocket';
 import Clock from '../components/Clock';
 import ProgressBar from './ProgressBar';
 
@@ -20,7 +19,6 @@ class BasicLayout extends React.Component {
       language: getLocale(),
     };
     this.taskRemindInterval = null;
-    this.websocketServices = null;
     // 获取当前current key
     const pathname = props.location.pathname;
     this.key = pathname ? pathname.substr(1) : '';
@@ -38,10 +36,6 @@ class BasicLayout extends React.Component {
     this.createSocket();
   }
 
-  componentWillUnmount() {
-    this.websocketServices && this.websocketServices.onclose();
-  }
-
   // 切换语言
   onLocaleChange = () => {
     if (this.state.language === 'zh-CN') {
@@ -54,80 +48,80 @@ class BasicLayout extends React.Component {
   };
 
   // 创建websocket连接
-  createSocket = () => {
-    // const socketService = localStorage.getItem('lianmed_web_socket');
-    // const params = {
-    //   clientType: 'ctg-suit',
-    //   token: 'eyJ1c2VybmFtZSI6ICJhZG1pbiIsInBhc3N3b3JkIjogImFkbWluIn0=',
-    // };
-    // const socketUrl = `ws://${socketService}/?${stringify(params)}`;
+  createSocket = async () => {
+    const options = {
+      connectionTimeout: 1000,
+      maxRetries: 10000,
+    };
     const socketUrl = `ws://${window.configuration.ws}`;
-    this.websocketServices = new Socket({
-      socketUrl: socketUrl,
-      timeout: 5000,
-      socketClose: msg => {
-        // console.log(msg);
-      },
-      socketError: () => {
-        // Modal.alert('提示', '建立连接失败', [
-        //   {
-        //     text: '重新连接',
-        //     onPress: () => {
-        //       // 重试创建socket连接
-        //       try {
-        //         // this.websocketServices.connection();
-        //         const origin = window.location.origin;
-        //         window.location.href = `${origin}/#/scan`;
-        //         window.location.reload();
-        //       } catch (e) {
-        //         // 捕获异常，防止js error
-        //         console.log('异常连接', e);
-        //       }
-        //     },
-        //   },
-        // ]);
-      },
-      socketOpen: () => {
-        console.log('连接建立成功');
-        // 心跳机制 定时向后端发数据
-        // this.taskRemindInterval = setInterval(() => {
-        //   this.socket.sendMessage({ msgType: 0 });
-        // }, 30000);
-      },
-      socketMessage: receive => {
-        if (!receive.data.includes('{')) {
-          return;
-        }
-        const result = JSON.parse(receive.data);
-
-        const { name, data } = result;
-        if (name === 'QRcode' && data !== 'www.vguang.cn') {
-          console.log('扫码信息ws data -->', data);
-          const res = /^Z.*J$/g;
-          const arr = data.split(/[=#]/);
-          const index = arr.findIndex(e => res.test(e));
-          // const is = this.checkQRCode(arr[index]);
-          if (index === -1) {
-            Toast.info('请使用围产保健-我的二维码');
-          } else {
-            const userid = arr[index].slice(1, -1);
-            this.getUser(userid);
-          }
-        }
-        if (name === 'SerialData') {
-          console.log('测量数据ws data -->', data);
-          this.pushSerialData(data);
-          // this.serialData(data);
-        }
-      },
+    const rws = await new ReconnectingWebSocket(socketUrl, [], options);
+    rws.addEventListener('open', e => {
+      console.log('websocket连接建立成功');
+      this.props.dispatch({
+        type: 'global/updateState',
+        payload: {
+          socketState: e.target.readyState,
+        },
+      });
     });
-    // 重试创建socket连接
-    try {
-      this.websocketServices.connection();
-    } catch (e) {
-      // 捕获异常，防止js error
-      console.log('异常连接', e);
-    }
+    rws.addEventListener('message', e => {
+      console.log('-----------message ws信息-------------', e.data);
+      if (!e.data.includes('{')) {
+        return;
+      }
+      const result = JSON.parse(e.data);
+
+      const { name, data } = result;
+      if (name === 'QRcode') {
+        if (data === 'www.vguang.cn') {
+          return console.log('---心跳---');
+        }
+        console.log('扫码信息ws data -->', data);
+        const res = /^Z.*J$/g;
+        const arr = data.split(/[=#]/);
+        const index = arr.findIndex(e => res.test(e));
+        // const is = this.checkQRCode(arr[index]);
+        if (index === -1) {
+          Toast.info('请使用围产保健-我的二维码');
+        } else {
+          const userid = arr[index].slice(1, -1);
+          this.getUser(userid);
+        }
+      }
+      if (name === 'SerialData') {
+        console.log('测量数据ws data -->', data);
+        this.pushSerialData(data);
+        // this.serialData(data);
+      }
+    });
+
+    rws.addEventListener('error', e => {
+      // Modal.alert('提示', '建立连接失败', [
+      //   {
+      //     text: '重新连接',
+      //     onPress: () => {
+      //       // 重试创建socket连接
+      //       try {
+      //         // this.websocketServices.connection();
+      //         const origin = window.location.origin;
+      //         window.location.href = `${origin}/#/scan`;
+      //         window.location.reload();
+      //       } catch (e) {
+      //         // 捕获异常，防止js error
+      //         console.log('异常连接', e);
+      //       }
+      //     },
+      //   },
+      // ]);
+      this.props.dispatch({
+        type: 'global/updateState',
+        payload: {
+          socketState: e.target.readyState,
+        },
+      });
+    });
+
+    window.websocketServices = rws;
   };
 
   // 检验二维码的合法性

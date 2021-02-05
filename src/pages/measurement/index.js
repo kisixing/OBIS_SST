@@ -10,7 +10,7 @@ import styles from './index.less';
 
 const alert = Modal.alert;
 
-function Measurement({ dispatch, global: { user, bufferString, checkCompleted } }) {
+function Measurement({ dispatch, global: { user, bufferString, checkCompleted, socketState } }) {
   // const { id, name } = location.query;
   const [measuring, setMeasuring] = useState(false);
   const targetTime = new Date().getTime() + 1000 * 30;
@@ -53,6 +53,10 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted } 
 
   const onEnd = () => {
     Router.push('/result');
+  };
+
+  const handleStart = () => {
+    window.websocketServices.send('S');
   };
 
   // const insertRecord = () => {
@@ -111,7 +115,7 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted } 
             >
               {formatMessage({ id: 'lianmed.back' })}
             </Button>
-            <Button inline type="primary">
+            <Button inline type="primary" disabled={socketState !== 1} onClick={handleStart}>
               开始测量
             </Button>
           </div>
