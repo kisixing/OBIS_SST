@@ -114,10 +114,11 @@ export default {
       let buffer = yield select(_ => _.global.buffer);
       buffer.push(payload);
       const hex = buffer.join('');
-      const res = /^bp,9{20},[0-9]{4}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1,3},[0-9]{1}\n|\r/;
-      if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
+      // console.log('-----123-----', hex);
+      const res = /^ID9{20}B[0-9]{2}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2}[0-9]{1}[0-9]{3}[0-9]{1}[0-9]{3}[0-9]{1}[0-9]{3}[0-9]{1}\n|\r/;
+      if (hex.length === 80 && hex.slice(0, 6) === '024944' && hex.slice(-2) === '03') {
         const string = hexToString(hex);
-        if (!res.test(string)) {
+        if (hex.length !== 80) {
           Modal.alert('提示', '测量失败，请重新测量', [
             {
               text: '确定',
@@ -133,7 +134,8 @@ export default {
             },
           ]);
         } else {
-          const arr = string.split(',');
+          const arr = string.split(' ');
+          // console.log('-----456-----', string, arr);
           yield put({
             type: 'updateState',
             payload: {

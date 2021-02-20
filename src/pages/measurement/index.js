@@ -28,27 +28,37 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted, s
   }, []);
 
   const goBack = () => {
-    alert(formatMessage({ id: 'lianmed.prompt' }), '确定返回扫描界面重新绑定孕妇?', [
-      {
-        text: formatMessage({ id: 'lianmed.cancel' }),
-        onPress: () => console.log('cancel'),
-        style: 'default',
-      },
-      {
-        text: formatMessage({ id: 'lianmed.confirm' }),
-        onPress: () => {
-          dispatch({
-            type: 'global/updateState',
-            payload: {
-              user: {},
-              result: [],
-              buffer: [],
-            },
-          });
-          Router.push('/scan');
+    alert(
+      formatMessage({
+        id: 'lianmed.prompt',
+      }),
+      '确定返回扫描界面重新绑定孕妇?',
+      [
+        {
+          text: formatMessage({
+            id: 'lianmed.cancel',
+          }),
+          onPress: () => console.log('cancel'),
+          style: 'default',
         },
-      },
-    ]);
+        {
+          text: formatMessage({
+            id: 'lianmed.confirm',
+          }),
+          onPress: () => {
+            dispatch({
+              type: 'global/updateState',
+              payload: {
+                user: {},
+                result: [],
+                buffer: [],
+              },
+            });
+            Router.push('/scan');
+          },
+        },
+      ],
+    );
   };
 
   const onEnd = () => {
@@ -56,8 +66,68 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted, s
   };
 
   const handleStart = () => {
-    window.websocketServices.send('S');
+    // 0x02 0x53 0x03
+    // const str = byteToString([0x02, 0x53, 0x03]);
+
+    window.websocketServices.send(
+      JSON.stringify({
+        name: 'blood',
+        data: 'start',
+      }),
+    );
   };
+
+  // 字节序列转ASCII码
+  // [0x24, 0x26, 0x28, 0x2A] ==> "$&C*"
+  function byteToString(arr) {
+    if (typeof arr === 'string') {
+      return arr;
+    }
+    var str = '',
+      _arr = arr;
+    for (var i = 0; i < _arr.length; i++) {
+      var one = _arr[i].toString(2),
+        v = one.match(/^1+?(?=0)/);
+      if (v && one.length === 8) {
+        var bytesLength = v[0].length;
+        var store = _arr[i].toString(2).slice(7 - bytesLength);
+        for (var st = 1; st < bytesLength; st++) {
+          store += _arr[st + i].toString(2).slice(2);
+        }
+        str += String.fromCharCode(parseInt(store, 2));
+        i += bytesLength - 1;
+      } else {
+        str += String.fromCharCode(_arr[i]);
+      }
+    }
+    return str;
+  }
+
+  //字符串转字节序列
+  function stringToByte(str) {
+    var bytes = new Array();
+    var len, c;
+    len = str.length;
+    for (var i = 0; i < len; i++) {
+      c = str.charCodeAt(i);
+      if (c >= 0x010000 && c <= 0x10ffff) {
+        bytes.push(((c >> 18) & 0x07) | 0xf0);
+        bytes.push(((c >> 12) & 0x3f) | 0x80);
+        bytes.push(((c >> 6) & 0x3f) | 0x80);
+        bytes.push((c & 0x3f) | 0x80);
+      } else if (c >= 0x000800 && c <= 0x00ffff) {
+        bytes.push(((c >> 12) & 0x0f) | 0xe0);
+        bytes.push(((c >> 6) & 0x3f) | 0x80);
+        bytes.push((c & 0x3f) | 0x80);
+      } else if (c >= 0x000080 && c <= 0x0007ff) {
+        bytes.push(((c >> 6) & 0x1f) | 0xc0);
+        bytes.push((c & 0x3f) | 0x80);
+      } else {
+        bytes.push(c & 0xff);
+      }
+    }
+    return bytes;
+  }
 
   // const insertRecord = () => {
   //   dispatch({
@@ -95,14 +165,26 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted, s
             target={targetTime}
             onEnd={onEnd}
           />
-          <p>xxx {formatMessage({ id: 'lianmed.measuringTip' })}</p>
+          <p>
+            xxx{' '}
+            {formatMessage({
+              id: 'lianmed.measuringTip',
+            })}
+          </p>
         </div>
       ) : (
         <div className={styles.operationTip}>
           <div className={styles.left}>
             <h2>{user.name} 你好！</h2>
             <p>
-              我们可以开始测量血压了，请根据<strong style={{ color: '#f00' }}>语音提示</strong>
+              我们可以开始测量血压了，请根据
+              <strong
+                style={{
+                  color: '#f00',
+                }}
+              >
+                语音提示
+              </strong>
               操作。
             </p>
             <p>1、请点击血压测量设备的开始按钮</p>
@@ -110,10 +192,15 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted, s
             <Button
               inline
               size="small"
-              style={{ marginTop: '1.2rem', marginRight: 24 }}
+              style={{
+                marginTop: '1.2rem',
+                marginRight: 24,
+              }}
               onClick={goBack}
             >
-              {formatMessage({ id: 'lianmed.back' })}
+              {formatMessage({
+                id: 'lianmed.back',
+              })}
             </Button>
             <Button inline type="primary" disabled={socketState !== 1} onClick={handleStart}>
               开始测量

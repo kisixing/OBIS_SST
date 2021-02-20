@@ -1,4 +1,3 @@
-
 // ref: https://umijs.org/config/
 import { resolve } from 'path';
 
@@ -55,7 +54,7 @@ export default {
           },
         ],
         links: [{ rel: 'icon', href: '/favicon.png', type: 'image/x-icon' }],
-        headScripts: [{ src: `<%= PUBLIC_PATH %>config.js?timestamp=${new Date().getTime()}` },],
+        headScripts: [{ src: `<%= PUBLIC_PATH %>config.js?timestamp=${new Date().getTime()}` }],
       },
     ],
   ],
@@ -68,7 +67,7 @@ export default {
   },
   proxy: {
     '/api': {
-      target: 'http://119.23.213.124/',
+      target: 'http://192.168.16.102:9988/',
       changeOrigin: false,
       // pathRewrite: { '^/api': '' },
     },

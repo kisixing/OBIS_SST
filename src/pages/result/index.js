@@ -55,9 +55,9 @@ function Result({ dispatch, result, user }) {
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     if (result.length) {
-      const hBP = result[4].replace(/\b(0+)/gi, '');
-      const lBP = result[6].replace(/\b(0+)/gi, '');
-      const rate = result[7].replace(/\b(0+)/gi, '');
+      const hBP = result[1].replace(/\b(0+)/gi, '');
+      const lBP = result[2].replace(/\b(0+)/gi, '');
+      const rate = result[3].replace(/\b(0+)/gi, '');
       judgeGrade(hBP * 1, lBP * 1);
       setValue([
         {
@@ -142,7 +142,7 @@ function Result({ dispatch, result, user }) {
       type: 'global/insertBgRecord',
       payload: {
         userid: user.id,
-        date: moment(result[2] + ' ' + result[3]).format('YYYY-MM-DD HH:mm:ss'),
+        date: moment().format('YYYY-MM-DD HH:mm:ss'),
         // shrinkpressure: result[4].replace(/\b(0+)/gi, ''),
         // diastolicpressure: result[6].replace(/\b(0+)/gi, ''),
         // heartrate: result[7].replace(/\b(0+)/gi, ''),
