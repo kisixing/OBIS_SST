@@ -13,9 +13,7 @@ function ScanAndLogin(props) {
 
   useEffect(() => {
     // Specify how to clean up after this effect:
-    return function cleanup() {
-
-    };
+    return function cleanup() {};
   }, []);
 
   const onErrorClick = () => {
@@ -29,10 +27,10 @@ function ScanAndLogin(props) {
     // 清除空格
     e.preventDefault();
     const vv = phone.replace(/\s/g, '');
-    if (vv.length >= 11) {
+    const value = e.target.value;
+    if (vv.length >= 11 || value == 12) {
       return;
     }
-    const value = e.target.value;
     let newPhone = phone.concat(value);
     if (newPhone.length === 3 || newPhone.length === 8) {
       newPhone += ' ';
@@ -44,7 +42,7 @@ function ScanAndLogin(props) {
     } else {
       setError(true);
     }
-  }
+  };
 
   const deleted = e => {
     e.stopPropagation();
@@ -59,13 +57,13 @@ function ScanAndLogin(props) {
     } else {
       setError(true);
     }
-  }
+  };
 
   const getUser = mobile => {
     const { dispatch } = props;
     dispatch({
       type: 'global/getDocByMobile',
-      payload: mobile
+      payload: mobile,
     }).then(res => {
       if (res && res.id) {
         const data = { ...res };
@@ -81,12 +79,16 @@ function ScanAndLogin(props) {
         // Toast.info(res.message);
         Modal.alert('提示', `孕册${res.message}，请前往移动端建档。`, [
           { text: '确定', onPress: () => {} },
-        ]);;
+        ]);
       }
     });
   };
 
   const submit = e => {
+    console.log('---89---', window.configuration.disabledMobile);
+    if (window.configuration.disabledMobile) {
+      return Toast.info('请使用二维码！');
+    }
     e.stopPropagation();
     // 清除空格
     const vv = phone.replace(/\s/g, '');
@@ -98,7 +100,7 @@ function ScanAndLogin(props) {
       return Toast.info(formatMessage({ id: 'lianmed.phoneError' }));
     }
     getUser(vv);
-  }
+  };
 
   return (
     <div className={styles.page}>
