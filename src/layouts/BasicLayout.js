@@ -7,6 +7,7 @@ import { connect } from 'dva';
 import { Modal, Toast, ActivityIndicator } from 'antd-mobile';
 import { formatMessage, getLocale, setLocale } from 'umi-plugin-locale';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import moment from 'moment';
 import Clock from '../components/Clock';
 import ProgressBar from './ProgressBar';
 
@@ -34,6 +35,7 @@ class BasicLayout extends React.Component {
       },
     });
     this.createSocket();
+    // ZJ#就诊卡号#姓名#身份证号码#出生日期#末次月经#孕次#产次#手机号码#生成二维码时间
   }
 
   // 切换语言
@@ -82,11 +84,16 @@ class BasicLayout extends React.Component {
         const index = arr.findIndex(e => res.test(e));
         // const is = this.checkQRCode(arr[index]);
         if (index === -1) {
-          Toast.info('请使用围产保健-我的二维码');
-        } else {
-          const userid = arr[index].slice(1, -1);
-          this.getUser(userid);
+          return Toast.info('请使用围产保健-我的二维码');
         }
+        if (
+          moment().format('YYYY-MM-DD') !== moment(Number(arr[arr.length - 1])).format('YYYY-MM-DD')
+        ) {
+          // 二维码仅限于当天生成的
+          return Toast.info('请更新二维码');
+        }
+        const userid = arr[index].slice(1, -1);
+        this.getUser(userid);
       }
       if (name === 'SerialData') {
         console.log('测量数据ws data -->', data);
