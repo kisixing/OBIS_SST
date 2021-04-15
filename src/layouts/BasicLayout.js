@@ -87,13 +87,15 @@ class BasicLayout extends React.Component {
           return Toast.info('请使用围产保健-我的二维码');
         }
         if (
-          moment().format('YYYY-MM-DD') !== moment(Number(arr[arr.length - 1])).format('YYYY-MM-DD')
+          arr[9] &&
+          moment(Number(arr[9])).format('YYYY-MM-DD') === moment().format('YYYY-MM-DD')
         ) {
-          // 二维码仅限于当天生成的
-          return Toast.info('请更新二维码');
+          const userid = arr[index].slice(1, -1);
+          return this.getUser(userid);
         }
-        const userid = arr[index].slice(1, -1);
-        this.getUser(userid);
+
+        // 二维码仅限于当天生成的
+        return Toast.info('请更新二维码');
       }
       if (name === 'SerialData') {
         console.log('测量数据ws data -->', data);

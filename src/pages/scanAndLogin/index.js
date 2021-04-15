@@ -85,7 +85,6 @@ function ScanAndLogin(props) {
   };
 
   const submit = e => {
-    console.log('---89---', window.configuration.disabledMobile);
     if (window.configuration.disabledMobile) {
       return Toast.info('请使用二维码！');
     }
