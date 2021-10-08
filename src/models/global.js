@@ -78,7 +78,6 @@ export default {
       if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
         const string = hexToString(hex);
         const arr = string.split(',');
-        // console.log('8888888', hex, string, arr)
         yield put({
           type: 'updateState',
           payload: {
@@ -107,6 +106,53 @@ export default {
       return response;
     },
     *instackBuffer({ payload }, { put, select }) {
+      const user = yield select(_ => _.global.user);
+      if (user && !user.id) {
+        return Toast.info('无用户信息...');
+      }
+      let buffer = yield select(_ => _.global.buffer);
+      buffer.push(payload);
+      const hex = buffer.join('');
+      const res = /^ID9{20}B[0-9]{2}\/[0-9]{2}\/[0-9]{2},[0-9]{2}:[0-9]{2}[0-9]{1}[0-9]{3}[0-9]{1}[0-9]{3}[0-9]{1}[0-9]{3}[0-9]{1}\n|\r/;
+      if (hex.slice(0, 6) === '62702C' && hex.slice(-2) === '0D') {
+        const string = hexToString(hex);
+        if (hex.length !== 118) {
+          Modal.alert('提示', '测量失败，请重新测量', [
+            {
+              text: '确定',
+              onPress: () => {
+                put({
+                  type: 'updateState',
+                  payload: {
+                    result: [],
+                    buffer: [],
+                  },
+                });
+              },
+            },
+          ]);
+        } else {
+          const arr = string.split(',');
+          // console.log('-----456-----', string, arr);
+          yield put({
+            type: 'updateState',
+            payload: {
+              result: arr,
+              buffer: [],
+            },
+          });
+          yield put(routerRedux.push('/result'));
+        }
+      } else {
+        yield put({
+          type: 'updateState',
+          payload: {
+            buffer,
+          },
+        });
+      }
+    },
+    *instackBuffer2({ payload }, { put, select }) {
       const user = yield select(_ => _.global.user);
       if (user && !user.id) {
         return;
@@ -162,6 +208,18 @@ export default {
         ...state,
         ...payload,
       };
+    },
+  },
+
+  subscriptions: {
+    setup({ dispatch, history }) {
+      return history.listen(({ pathname }) => {
+        // console.log('-----888999-----', parseInt('1020'));
+        // const string = hexToString(
+        //   '62702C39393939393939393939393939393939393939392C323032312F30352F32372C31373A30312C3130332C3037332C3035382C3037362C310D',
+        // );
+        // console.log('----789----', string);
+      });
     },
   },
 };

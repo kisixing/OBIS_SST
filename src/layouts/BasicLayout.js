@@ -12,6 +12,7 @@ import Clock from '../components/Clock';
 import ProgressBar from './ProgressBar';
 
 import styles from './BasicLayout.less';
+const protocol = window.configuration.protocol;
 
 class BasicLayout extends React.Component {
   constructor(props) {
@@ -151,10 +152,18 @@ class BasicLayout extends React.Component {
   };
 
   pushSerialData = data => {
-    this.props.dispatch({
-      type: 'global/instackBuffer',
-      payload: data,
-    });
+    if (protocol === '1') {
+      this.props.dispatch({
+        type: 'global/instackBuffer',
+        payload: data,
+      });
+    }
+    if (protocol === '2') {
+      this.props.dispatch({
+        type: 'global/instackBuffer2',
+        payload: data,
+      });
+    }
   };
 
   serialData = data => {

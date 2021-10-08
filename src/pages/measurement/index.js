@@ -19,7 +19,7 @@ function Measurement({ dispatch, global: { user, bufferString, checkCompleted, s
     // effect;
     return () => {
       dispatch({
-        type: 'blobal/updateState',
+        type: 'global/updateState',
         payload: {
           checkCompleted: false,
         },

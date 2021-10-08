@@ -42,6 +42,7 @@ const GRADES = [
     color: '#FF0000',
   },
 ];
+const protocol = window.configuration.protocol;
 
 function Result({ dispatch, result, user }) {
   const [count, setCount] = useState(5);
@@ -55,9 +56,15 @@ function Result({ dispatch, result, user }) {
   // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
     if (result.length) {
-      const hBP = result[1].replace(/\b(0+)/gi, '');
-      const lBP = result[2].replace(/\b(0+)/gi, '');
-      const rate = result[3].replace(/\b(0+)/gi, '');
+      let hBP = parseInt(result[4]);
+      let lBP = parseInt(result[6]);
+      let rate = parseInt(result[7]);
+      if (protocol === '2') {
+        hBP = parseInt(result[1]);
+        lBP = parseInt(result[2]);
+        rate = parseInt(result[3]);
+      }
+
       judgeGrade(hBP * 1, lBP * 1);
       setValue([
         {
