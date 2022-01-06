@@ -30,12 +30,15 @@ class Clock extends React.Component {
     const currentTime = new Date();
     return {
       year: currentTime.getFullYear(),
-      month: currentTime.getMonth(),
+      month: currentTime.getMonth() + 1,
       date: currentTime.getDate(),
       hours: currentTime.getHours(),
       minutes: currentTime.getMinutes(),
       seconds: currentTime.getSeconds(),
-      ampm: currentTime.getHours() >= 12 ? formatMessage({ id: 'lianmed.pm' }) : formatMessage({ id: 'lianmed.am' }),
+      ampm:
+        currentTime.getHours() >= 12
+          ? formatMessage({ id: 'lianmed.pm' })
+          : formatMessage({ id: 'lianmed.am' }),
     };
   }
 
@@ -44,17 +47,10 @@ class Clock extends React.Component {
     return (
       <div style={{ display: 'inline-block', fontSize: '.1rem', color: '#333' }}>
         <span style={{ marginRight: '0.08rem' }}>
-          {year}
-          -
-          {month > 9 ? month : `0${month + 1}` }
-          -
-          {date > 9 ? date : `0${date}`}
+          {year}-{month > 9 ? month : `0${month}`}-{date > 9 ? date : `0${date}`}
         </span>
         <span>
-          {hours}:
-          {minutes > 9 ? minutes : `0${minutes}`}:
-          {seconds > 9 ? seconds : `0${seconds}`}
-          {' '}
+          {hours}:{minutes > 9 ? minutes : `0${minutes}`}:{seconds > 9 ? seconds : `0${seconds}`}{' '}
           {ampm}
         </span>
       </div>
